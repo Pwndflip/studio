@@ -37,9 +37,9 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-background">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-muted/40">
       <div className="w-full max-w-md animate-in fade-in-50 slide-in-from-bottom-5 duration-500">
-        <Card className="shadow-2xl">
+        <Card className="shadow-2xl rounded-2xl">
           <CardHeader className="text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
               <Database className="h-8 w-8 text-primary-foreground" />

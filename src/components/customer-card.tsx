@@ -49,13 +49,13 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
   const displayDate = parseDate(displayDateStr);
 
   return (
-    <Card className="flex h-full flex-col transition-shadow hover:shadow-lg">
+    <Card className="flex h-full flex-col transition-shadow hover:shadow-xl rounded-2xl">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <Avatar>
-              <AvatarFallback>
-                <User />
+            <Avatar className="w-12 h-12">
+              <AvatarFallback className="text-xl">
+                {customer.name?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
@@ -75,7 +75,7 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
             </div>
           </div>
           {displayDate && (
-            <div className="text-xs text-muted-foreground flex items-center gap-1 shrink-0">
+            <div className="text-xs text-muted-foreground flex items-center gap-1 shrink-0 pt-1">
                 <CalendarDays className="w-3 h-3"/>
                 <span>{format(displayDate, 'dd.MM.yyyy')}</span>
             </div>
