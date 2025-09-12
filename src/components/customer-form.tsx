@@ -144,7 +144,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Vollständiger Name</FormLabel>
-                  <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
+                  <FormControl><Input placeholder="John Doe" {...field} spellCheck="true" /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -166,7 +166,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Adresse</FormLabel>
-                    <FormControl><Input placeholder="Musterstraße 123, 12345 Musterstadt" {...field} value={field.value ?? ""} /></FormControl>
+                    <FormControl><Input placeholder="Musterstraße 123, 12345 Musterstadt" {...field} value={field.value ?? ""} spellCheck="true" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -178,7 +178,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Gerät</FormLabel>
-                    <FormControl><Input placeholder="z.B. Siemens Waschmaschine" {...field} /></FormControl>
+                    <FormControl><Input placeholder="z.B. Siemens Waschmaschine" {...field} spellCheck="true" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -270,7 +270,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Problembeschreibung</FormLabel>
-                    <FormControl><Textarea placeholder="z.B. schleudert nicht, heizt nicht" {...field} value={field.value ?? ""} rows={5} /></FormControl>
+                    <FormControl><Textarea placeholder="z.B. schleudert nicht, heizt nicht" {...field} value={field.value ?? ""} rows={5} spellCheck="true" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -283,7 +283,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
                     <div className="flex items-center justify-between">
                       <FormLabel>Interne Notizen</FormLabel>
                     </div>
-                    <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." {...field} value={field.value ?? ""} className="flex-grow" /></FormControl>
+                    <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." {...field} value={field.value ?? ""} className="flex-grow" spellCheck="true" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
