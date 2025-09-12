@@ -84,8 +84,8 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
 
   async function handleRefineNotes() {
     setIsRefining(true);
-    const currentNotes = form.getValues("notes.value");
-    const result = await refineNotesAction(currentNotes);
+    const currentNotesValue = form.getValues("notes.value");
+    const result = await refineNotesAction(currentNotesValue);
 
     if (result.error) {
       toast({
@@ -143,7 +143,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Telefonnummer</FormLabel>
-                  <FormControl><Input placeholder="+49 123 4567890" {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} /></FormControl>
+                  <FormControl><Input placeholder="0176 12345678" {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} /></FormControl>
                   <FormMessage />
                   <FieldLastEdited date={field.value.lastEdited} />
                 </FormItem>
@@ -155,7 +155,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Adresse</FormLabel>
-                    <FormControl><Input placeholder="Musterstraße 123, Musterstadt, Deutschland" {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} /></FormControl>
+                    <FormControl><Input placeholder="Musterstraße 123, 12345 Musterstadt" {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} /></FormControl>
                     <FormMessage />
                     <FieldLastEdited date={field.value.lastEdited} />
                   </FormItem>
@@ -262,7 +262,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                         Mit KI verfeinern
                       </Button>
                     </div>
-                    <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} className="flex-grow" /></FormControl>
+                    <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} className="flex-grow" /></FormControl>
                     <FormMessage />
                     <FieldLastEdited date={field.value.lastEdited} />
                   </FormItem>
@@ -307,3 +307,5 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
     </Form>
   );
 }
+
+    
