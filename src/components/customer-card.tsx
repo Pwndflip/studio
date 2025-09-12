@@ -3,8 +3,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MapPin, Phone, MessageSquare, Computer, Wrench, User } from "lucide-react";
+import { MapPin, Phone, MessageSquare, Computer, Wrench, User, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const statusColors: Record<Status, string> = {
   "in-progress": "bg-yellow-400/20 text-yellow-700 border-yellow-400/30 hover:bg-yellow-400/30 dark:text-yellow-400",
@@ -23,7 +24,7 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
   return (
     <Card className="flex h-full flex-col transition-shadow hover:shadow-lg">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
             <Avatar>
               <AvatarFallback>
@@ -38,6 +39,10 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
                 </Badge>
               </CardDescription>
             </div>
+          </div>
+          <div className="text-xs text-muted-foreground flex items-center gap-1 shrink-0">
+            <CalendarDays className="w-3 h-3"/>
+            <span>{format(new Date(customer.lastEdited), 'dd/MM/yyyy')}</span>
           </div>
         </div>
       </CardHeader>

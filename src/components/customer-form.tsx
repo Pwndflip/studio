@@ -45,7 +45,7 @@ const formSchema = z.object({
 
 type CustomerFormProps = {
   customer: Customer | null;
-  onSave: (customer: Customer) => void;
+  onSave: (customer: z.infer<typeof formSchema>) => void;
   onDelete: (customerId: string) => void;
   onDone: () => void;
 };
@@ -89,12 +89,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const newCustomerData = {
-      ...(customer || {}),
-      id: customer?.id || Date.now().toString(),
-      ...values,
-    };
-    onSave(newCustomerData as Customer);
+    onSave(values);
     toast({
       title: "Kunde gespeichert",
       description: `Die Daten von ${values.name} wurden erfolgreich gespeichert.`,

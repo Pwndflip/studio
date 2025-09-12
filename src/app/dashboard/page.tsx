@@ -8,7 +8,7 @@ import { DashboardHeader } from '@/components/dashboard-header';
 import { CustomerFormDialog } from '@/components/customer-form-dialog';
 
 export default function DashboardPage() {
-  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
+  const [customers, setCustomers] = useState<Customer[]>(initialCustomers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<Status | 'all'>('all');
   const [deviceFilter, setDeviceFilter] = useState<string>('all');
@@ -42,11 +42,19 @@ export default function DashboardPage() {
     setIsFormOpen(true);
   };
 
-  const handleSaveCustomer = (customerData: Customer) => {
+  const handleSaveCustomer = (customerData: Omit<Customer, 'id' | 'createdAt' | 'lastEdited'> & { id?: string }) => {
+    const now = new Date().toISOString();
     if (editingCustomer) {
-      setCustomers(customers.map((c) => (c.id === customerData.id ? customerData : c)));
+      const updatedCustomer = { ...editingCustomer, ...customerData, lastEdited: now };
+      setCustomers(customers.map((c) => (c.id === updatedCustomer.id ? updatedCustomer : c)));
     } else {
-      setCustomers([...customers, { ...customerData, id: Date.now().toString() }]);
+      const newCustomer: Customer = {
+        ...customerData,
+        id: Date.now().toString(),
+        createdAt: now,
+        lastEdited: now,
+      };
+      setCustomers([newCustomer, ...customers]);
     }
     setIsFormOpen(false);
   };
@@ -56,7 +64,7 @@ export default function DashboardPage() {
     setIsFormOpen(false);
   }
 
-  const allDevices = useMemo(() => [...new Set(customers.map(c => c.device).sort())], [customers]);
+  const allDevices = useMemo(() => [...new Set(initialCustomers.map(c => c.device).sort())], []);
 
   return (
     <>

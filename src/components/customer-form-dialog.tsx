@@ -14,7 +14,7 @@ type CustomerFormDialogProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   customer: Customer | null;
-  onSave: (customer: Customer) => void;
+  onSave: (customer: Omit<Customer, 'id' | 'createdAt' | 'lastEdited'> & { id?: string }) => void;
   onDelete: (customerId: string) => void;
 };
 
