@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { app } from "@/lib/firebase";
+import Image from "next/image";
 
 function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -47,7 +48,7 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
-       <header className="sticky top-4 z-20 mx-4 mt-4 flex h-16 items-center gap-4 rounded-xl border bg-background/20 shadow-xl backdrop-blur-2xl md:px-6">
+       <header className="sticky top-4 z-30 mx-4 mt-4 flex h-16 items-center gap-4 rounded-xl border bg-background/20 shadow-xl backdrop-blur-2xl md:px-6">
         <nav className="flex-1">
           <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold md:text-base">
             <Database className="h-6 w-6 text-primary" />
@@ -78,7 +79,18 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 animate-in fade-in duration-500">
+      
+      <div className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
+        <Image
+            src="/wgm-logo.png"
+            alt="WeissgeraeteMarkt Logo"
+            width={400}
+            height={400}
+            className="opacity-10"
+        />
+      </div>
+
+      <main className="relative z-20 flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 animate-in fade-in duration-500">
         {children}
       </main>
     </div>
