@@ -47,7 +47,7 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
-       <header className="flex h-16 items-center gap-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6 z-10 mx-4 mt-4 rounded-xl shadow-md border">
+       <header className="sticky top-4 z-20 flex h-16 items-center gap-4 border bg-background/60 backdrop-blur-xl md:px-6 mx-4 mt-4 rounded-xl shadow-md">
         <nav className="flex-1">
           <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold md:text-base">
             <Database className="h-6 w-6 text-primary" />
