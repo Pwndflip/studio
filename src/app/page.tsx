@@ -9,7 +9,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md animate-in fade-in-50 slide-in-from-bottom-5 duration-500">
         <Card className="shadow-2xl">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
               <Zap className="h-8 w-8 text-primary-foreground" />
             </div>
             <CardTitle className="text-3xl font-bold font-headline">
