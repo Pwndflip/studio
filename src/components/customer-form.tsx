@@ -34,11 +34,11 @@ import {
 } from "@/components/ui/alert-dialog"
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters."),
-  address: z.string().min(5, "Address must be at least 5 characters."),
-  phone: z.string().min(7, "Please enter a valid phone number."),
-  device: z.string().min(2, "Device name is required."),
-  errorDescription: z.string().min(5, "Error description is required."),
+  name: z.string().min(2, "Der Name muss mindestens 2 Zeichen lang sein."),
+  address: z.string().min(5, "Die Adresse muss mindestens 5 Zeichen lang sein."),
+  phone: z.string().min(7, "Bitte geben Sie eine gültige Telefonnummer ein."),
+  device: z.string().min(2, "Gerätename ist erforderlich."),
+  errorDescription: z.string().min(5, "Fehlerbeschreibung ist erforderlich."),
   notes: z.string(),
   status: z.enum(["in-progress", "completed", "submitted", "ready-for-pickup"]),
 });
@@ -75,14 +75,14 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
     if (result.error) {
       toast({
         variant: "destructive",
-        title: "AI Refinement Failed",
+        title: "KI-Verfeinerung fehlgeschlagen",
         description: result.error,
       });
     } else {
       form.setValue("notes", result.refinedNotes, { shouldValidate: true });
       toast({
-        title: "Notes Refined",
-        description: "The customer notes have been improved by AI.",
+        title: "Notizen verfeinert",
+        description: "Die Kundennotizen wurden durch KI verbessert.",
       });
     }
     setIsRefining(false);
@@ -92,14 +92,12 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
     const newCustomerData = {
       ...(customer || {}),
       id: customer?.id || Date.now().toString(),
-      avatarUrl: customer?.avatarUrl || `https://picsum.photos/seed/${Date.now()}/40/40`,
-      imageHint: customer?.imageHint || 'person avatar',
       ...values,
     };
     onSave(newCustomerData as Customer);
     toast({
-      title: "Customer Saved",
-      description: `${values.name}'s details have been saved successfully.`,
+      title: "Kunde gespeichert",
+      description: `Die Daten von ${values.name} wurden erfolgreich gespeichert.`,
     });
   }
 
@@ -112,7 +110,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>Vollständiger Name</FormLabel>
                 <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
@@ -123,7 +121,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone Number</FormLabel>
+                <FormLabel>Telefonnummer</FormLabel>
                 <FormControl><Input placeholder="555-123-4567" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
@@ -135,8 +133,8 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Address</FormLabel>
-                <FormControl><Input placeholder="123 Main St, Anytown, USA" {...field} /></FormControl>
+                <FormLabel>Adresse</FormLabel>
+                <FormControl><Input placeholder="Musterstraße 123, Musterstadt, Deutschland" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -147,7 +145,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             name="device"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Device</FormLabel>
+                <FormLabel>Gerät</FormLabel>
                 <FormControl><Input placeholder="iPhone 14 Pro" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
@@ -161,7 +159,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                 <FormLabel>Status</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Status auswählen" /></SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {STATUSES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
@@ -177,8 +175,8 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             name="errorDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Error Description</FormLabel>
-                <FormControl><Textarea placeholder="e.g. Cracked screen, won't turn on" {...field} /></FormControl>
+                <FormLabel>Fehlerbeschreibung</FormLabel>
+                <FormControl><Textarea placeholder="z.B. gesprungener Bildschirm, lässt sich nicht einschalten" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -189,13 +187,13 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             render={({ field }) => (
               <FormItem>
                 <div className="flex items-center justify-between">
-                  <FormLabel>Internal Notes</FormLabel>
+                  <FormLabel>Interne Notizen</FormLabel>
                   <Button type="button" variant="ghost" size="sm" onClick={handleRefineNotes} disabled={isRefining}>
                     {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
-                    Refine with AI
+                    Mit KI verfeinern
                   </Button>
                 </div>
-                <FormControl><Textarea placeholder="Add any internal notes here..." {...field} rows={5} /></FormControl>
+                <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." {...field} rows={5} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -207,21 +205,20 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                 <AlertDialogTrigger asChild>
                   <Button type="button" variant="destructive" className="bg-red-600 hover:bg-red-700 text-white">
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
+                    Löschen
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>Sind Sie absolut sicher?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete the customer
-                      record for {customer.name}.
+                      Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird der Kundendatensatz für {customer.name} dauerhaft gelöscht.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>Abbrechen</AlertDialogCancel>
                     <AlertDialogAction onClick={() => onDelete(customer.id)} className="bg-destructive hover:bg-destructive/90">
-                      Continue
+                      Fortsetzen
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -229,8 +226,8 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             )}
           </div>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={onDone}>Cancel</Button>
-            <Button type="submit">Save Customer</Button>
+            <Button type="button" variant="outline" onClick={onDone}>Abbrechen</Button>
+            <Button type="submit">Kunde speichern</Button>
           </div>
         </div>
       </form>

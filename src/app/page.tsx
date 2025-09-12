@@ -18,10 +18,10 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-6 p-6">
             <p className="text-center text-muted-foreground">
-              Your AI-powered customer management tool.
+              Ihr KI-gestütztes Kundenmanagement-Tool.
             </p>
             <Button asChild className="w-full" size="lg">
-              <Link href="/dashboard">Enter Dashboard</Link>
+              <Link href="/dashboard">Dashboard betreten</Link>
             </Button>
           </CardContent>
         </Card>

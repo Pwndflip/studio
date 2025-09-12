@@ -1,10 +1,10 @@
 export type Status = 'in-progress' | 'completed' | 'submitted' | 'ready-for-pickup';
 
 export const STATUSES: { value: Status; label: string }[] = [
-  { value: 'in-progress', label: 'In Progress' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'submitted', label: 'Submitted' },
-  { value: 'ready-for-pickup', label: 'Ready for Pickup' },
+  { value: 'in-progress', label: 'In Bearbeitung' },
+  { value: 'completed', label: 'Abgeschlossen' },
+  { value: 'submitted', label: 'Eingereicht' },
+  { value: 'ready-for-pickup', label: 'Abholbereit' },
 ];
 
 export interface Customer {
@@ -16,8 +16,6 @@ export interface Customer {
   errorDescription: string;
   notes: string;
   status: Status;
-  avatarUrl: string;
-  imageHint: string;
 }
 
 export const initialCustomers: Customer[] = [
@@ -30,8 +28,6 @@ export const initialCustomers: Customer[] = [
     errorDescription: 'Cracked screen',
     notes: 'Customer dropped phone. Screen is completely shattered. Back glass is also cracked. Recommended full replacement.',
     status: 'in-progress',
-    avatarUrl: 'https://picsum.photos/seed/1/40/40',
-    imageHint: 'man portrait',
   },
   {
     id: '2',
@@ -42,8 +38,6 @@ export const initialCustomers: Customer[] = [
     errorDescription: 'Battery not charging',
     notes: 'Phone does not charge with any cable. Charging port seems to be loose. Needs port replacement.',
     status: 'submitted',
-    avatarUrl: 'https://picsum.photos/seed/2/40/40',
-    imageHint: 'woman portrait',
   },
   {
     id: '3',
@@ -54,8 +48,6 @@ export const initialCustomers: Customer[] = [
     errorDescription: 'Water damage',
     notes: 'Dropped in a pool. Phone does not turn on. Rice did not work. Needs full diagnostic.',
     status: 'completed',
-    avatarUrl: 'https://picsum.photos/seed/3/40/40',
-    imageHint: 'person glasses',
   },
   {
     id: '4',
@@ -66,8 +58,6 @@ export const initialCustomers: Customer[] = [
     errorDescription: 'Speaker not working',
     notes: 'No sound from earpiece speaker during calls. Loudspeaker works fine.',
     status: 'ready-for-pickup',
-    avatarUrl: 'https://picsum.photos/seed/4/40/40',
-    imageHint: 'woman smiling',
   },
     {
     id: '5',
@@ -78,8 +68,6 @@ export const initialCustomers: Customer[] = [
     errorDescription: 'Keyboard issues',
     notes: 'Several keys are not responding. No liquid spills reported. Butterfly keyboard model.',
     status: 'in-progress',
-    avatarUrl: 'https://picsum.photos/seed/5/40/40',
-    imageHint: 'man smiling',
   },
   {
     id: '6',
@@ -90,7 +78,5 @@ export const initialCustomers: Customer[] = [
     errorDescription: 'Face ID not working',
     notes: 'Face ID stopped working after latest iOS update. "A problem was detected with the TrueDepth camera." message appears. No visible damage.',
     status: 'submitted',
-    avatarUrl: 'https://picsum.photos/seed/6/40/40',
-    imageHint: 'woman profile',
   },
 ];

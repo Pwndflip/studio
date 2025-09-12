@@ -11,9 +11,9 @@ export function CustomerList({ customers, onEdit }: CustomerListProps) {
     return (
       <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm mt-4">
         <div className="flex flex-col items-center gap-1 text-center p-8">
-          <h3 className="text-2xl font-bold tracking-tight">No customers found</h3>
+          <h3 className="text-2xl font-bold tracking-tight">Keine Kunden gefunden</h3>
           <p className="text-sm text-muted-foreground">
-            Try adjusting your search or filters.
+            Versuchen Sie, Ihre Suche oder Filter anzupassen.
           </p>
         </div>
       </div>

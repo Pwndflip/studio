@@ -2,8 +2,8 @@ import type { Customer, Status } from "@/app/dashboard/data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Phone, MessageSquare, Computer, Wrench } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { MapPin, Phone, MessageSquare, Computer, Wrench, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const statusColors: Record<Status, string> = {
@@ -14,20 +14,27 @@ const statusColors: Record<Status, string> = {
 };
 
 export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit: () => void; }) {
+  const statusLabels: Record<Status, string> = {
+    'in-progress': 'In Bearbeitung',
+    'completed': 'Abgeschlossen',
+    'submitted': 'Eingereicht',
+    'ready-for-pickup': 'Abholbereit',
+  };
   return (
     <Card className="flex h-full flex-col transition-shadow hover:shadow-lg">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Avatar>
-              <AvatarImage src={customer.avatarUrl} alt={customer.name} data-ai-hint={customer.imageHint}/>
-              <AvatarFallback>{customer.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>
+                <User />
+              </AvatarFallback>
             </Avatar>
             <div>
               <CardTitle className="font-headline">{customer.name}</CardTitle>
               <CardDescription>
                 <Badge variant="outline" className={cn("mt-1 capitalize", statusColors[customer.status])}>
-                  {customer.status.replace('-', ' ')}
+                  {statusLabels[customer.status]}
                 </Badge>
               </CardDescription>
             </div>
@@ -57,7 +64,7 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
       </CardContent>
       <CardFooter>
         <Button variant="secondary" className="w-full" onClick={onEdit}>
-          <Wrench className="mr-2 h-4 w-4" /> Edit Details
+          <Wrench className="mr-2 h-4 w-4" /> Details bearbeiten
         </Button>
       </CardFooter>
     </Card>

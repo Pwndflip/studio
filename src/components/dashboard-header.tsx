@@ -35,7 +35,7 @@ export function DashboardHeader({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search customers..."
+            placeholder="Kunden suchen..."
             className="pl-10"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
@@ -43,10 +43,10 @@ export function DashboardHeader({
         </div>
         <Select value={statusFilter} onValueChange={onStatusChange}>
           <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filter by status" />
+            <SelectValue placeholder="Nach Status filtern" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="all">Alle Status</SelectItem>
             {STATUSES.map((status) => (
               <SelectItem key={status.value} value={status.value}>
                 {status.label}
@@ -56,10 +56,10 @@ export function DashboardHeader({
         </Select>
         <Select value={deviceFilter} onValueChange={onDeviceChange}>
           <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filter by device" />
+            <SelectValue placeholder="Nach Gerät filtern" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Devices</SelectItem>
+            <SelectItem value="all">Alle Geräte</SelectItem>
             {devices.map((device) => (
               <SelectItem key={device} value={device}>
                 {device}
@@ -70,7 +70,7 @@ export function DashboardHeader({
       </div>
       <Button onClick={onAddNew} className="ml-auto">
         <PlusCircle className="mr-2 h-4 w-4" />
-        Add Customer
+        Kunde hinzufügen
       </Button>
     </div>
   );

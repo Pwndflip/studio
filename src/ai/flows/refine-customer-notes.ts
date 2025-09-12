@@ -44,7 +44,7 @@ const refineCustomerNotesPrompt = ai.definePrompt({
   name: 'refineCustomerNotesPrompt',
   input: { schema: RefineCustomerNotesInputSchema },
   output: { schema: RefineCustomerNotesOutputSchema },
-  prompt: `You are an AI assistant that refines customer notes.
+  prompt: `You are an AI assistant that refines customer notes in German.
 
         Your goal is to highlight important details and correct any errors in the notes.
 

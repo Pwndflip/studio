@@ -25,10 +25,10 @@ export function CustomerFormDialog({
   onSave,
   onDelete,
 }: CustomerFormDialogProps) {
-  const title = customer ? "Edit Customer" : "Add New Customer";
+  const title = customer ? "Kunde bearbeiten" : "Neuen Kunden hinzufügen";
   const description = customer
-    ? "Update the customer details below."
-    : "Fill out the form to add a new customer record.";
+    ? "Aktualisieren Sie die Kundendetails unten."
+    : "Füllen Sie das Formular aus, um einen neuen Kundendatensatz hinzuzufügen.";
 
   // By re-mounting the form using a key, we ensure its state is reset
   // when switching between adding and editing different customers.
