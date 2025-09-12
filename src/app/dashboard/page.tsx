@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
-import { db } from '@/lib/firebase';
-import { ref, onValue, set, push, remove } from 'firebase/database';
 import type { Customer, Status } from './data';
 import { CustomerList } from '@/components/customer-list';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { CustomerFormDialog } from '@/components/customer-form-dialog';
 import { initialCustomers } from './data';
+
+// Helper to generate a unique enough ID for local state
+let nextId = 100;
 
 export default function DashboardPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -20,36 +21,19 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const customersRef = ref(db, 'einträge');
+    // Initialize customers from the local data file
+    const loadedCustomers = initialCustomers.map((c, i) => ({ ...c, id: `initial-${i}` }));
     
-    const unsubscribe = onValue(customersRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const loadedCustomers: Customer[] = Object.keys(data).map((key) => ({
-          id: key,
-          ...data[key],
-        }));
-        const sortedCustomers = loadedCustomers.sort((a, b) => {
-            const dateA = a.datum ? new Date(a.datum).getTime() : 0;
-            const dateB = b.datum ? new Date(b.datum).getTime() : 0;
-            return dateB - dateA;
-        });
-        setCustomers(sortedCustomers);
-        const uniqueDevices = [...new Set(sortedCustomers.map(c => c.gerät).filter(Boolean).sort())];
-        setAllDevices(uniqueDevices);
-      } else {
-        // If no data, populate with initial customers
-        const customersRef = ref(db, 'einträge');
-        initialCustomers.forEach(customer => {
-            const newCustomerRef = push(customersRef);
-            set(newCustomerRef, customer);
-        });
-        setCustomers([]);
-      }
-      setIsLoading(false);
+    const sortedCustomers = loadedCustomers.sort((a, b) => {
+        const dateA = a.datum ? new Date(a.datum).getTime() : 0;
+        const dateB = b.datum ? new Date(b.datum).getTime() : 0;
+        return dateB - dateA;
     });
 
-    return () => unsubscribe();
+    setCustomers(sortedCustomers);
+    const uniqueDevices = [...new Set(sortedCustomers.map(c => c.gerät).filter(Boolean).sort())];
+    setAllDevices(uniqueDevices);
+    setIsLoading(false);
   }, []);
 
   const filteredCustomers = useMemo(() => {
@@ -81,23 +65,22 @@ export default function DashboardPage() {
 
   const handleSaveCustomer = (customerData: Omit<Customer, 'id'> & { id?: string }) => {
     if (customerData.id) { // Editing existing customer
-      const customerRef = ref(db, `einträge/${customerData.id}`);
-      const updatedCustomer: Partial<Customer> = { ...customerData, notizEditDate: new Date().toLocaleDateString('de-DE') };
-      delete updatedCustomer.id; // Don't save id inside the customer object in DB
-      set(customerRef, updatedCustomer);
+      setCustomers(customers.map(c => 
+        c.id === customerData.id ? { ...c, ...customerData, notizEditDate: new Date().toLocaleDateString('de-DE') } : c
+      ));
     } else { // Adding new customer
-      const customersRef = ref(db, 'einträge');
-      const newCustomerRef = push(customersRef);
-      const newCustomerData: Partial<Customer> = { ...customerData };
-      delete newCustomerData.id;
-      set(newCustomerRef, newCustomerData);
+      const newCustomer: Customer = {
+        ...customerData,
+        id: `new-${nextId++}`,
+        datum: new Date().toISOString().split('T')[0], // Set current date for new entries
+      };
+      setCustomers([newCustomer, ...customers]);
     }
     setIsFormOpen(false);
   };
   
   const handleDeleteCustomer = (customerId: string) => {
-    const customerRef = ref(db, `einträge/${customerId}`);
-    remove(customerRef);
+    setCustomers(customers.filter(c => c.id !== customerId));
     setIsFormOpen(false);
   }
 
@@ -118,7 +101,7 @@ export default function DashboardPage() {
             <div className="flex flex-col items-center gap-1 text-center p-8">
                 <h3 className="text-2xl font-bold tracking-tight">Lade Kundendaten...</h3>
                 <p className="text-sm text-muted-foreground">
-                    Verbindung zur Datenbank wird hergestellt.
+                    Einen Moment bitte.
                 </p>
             </div>
          </div>
