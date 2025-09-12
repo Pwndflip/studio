@@ -4,34 +4,53 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Database, LogIn } from "lucide-react";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { Database, UserPlus } from "lucide-react";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
-import { app } from "@/lib/firebase"; // import app
+import { app } from "@/lib/firebase";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const auth = getAuth(app);
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard");
-    } catch (error: any) {
-      console.error("Login error:", error);
+    if (password !== confirmPassword) {
       toast({
         variant: "destructive",
-        title: "Anmeldung fehlgeschlagen",
-        description: "Bitte überprüfen Sie Ihre E-Mail-Adresse und Ihr Passwort.",
+        title: "Fehler bei der Registrierung",
+        description: "Die Passwörter stimmen nicht überein.",
+      });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      toast({
+        title: "Registrierung erfolgreich",
+        description: "Sie werden zum Dashboard weitergeleitet.",
+      });
+      router.push("/dashboard");
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      let description = "Ein unbekannter Fehler ist aufgetreten.";
+      if (error.code === 'auth/email-already-in-use') {
+        description = "Diese E-Mail-Adresse wird bereits verwendet.";
+      } else if (error.code === 'auth/weak-password') {
+        description = "Das Passwort ist zu schwach. Es muss mindestens 6 Zeichen lang sein.";
+      }
+      toast({
+        variant: "destructive",
+        title: "Registrierung fehlgeschlagen",
+        description: description,
       });
       setIsLoading(false);
     }
@@ -46,14 +65,14 @@ export default function LoginPage() {
               <Database className="h-8 w-8 text-primary-foreground" />
             </div>
             <CardTitle className="text-3xl font-bold font-headline">
-              WGM-Daten Login
+              Konto erstellen
             </CardTitle>
             <CardDescription>
-              Bitte melden Sie sich an, um fortzufahren.
+              Registrieren Sie sich, um WGM-Daten zu nutzen.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleSignup} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">E-Mail</Label>
                 <Input
@@ -77,15 +96,26 @@ export default function LoginPage() {
                   disabled={isLoading}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Passwort bestätigen</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Anmelden..." : "Anmelden"}
-                {!isLoading && <LogIn className="ml-2 h-4 w-4" />}
+                {isLoading ? "Registrieren..." : "Konto erstellen"}
+                {!isLoading && <UserPlus className="ml-2 h-4 w-4" />}
               </Button>
             </form>
           </CardContent>
           <CardFooter className="flex-col gap-2">
-             <p className="text-sm text-muted-foreground">
-                Noch kein Konto? <Link href="/signup" className="text-primary hover:underline">Registrieren</Link>
+            <p className="text-sm text-muted-foreground">
+              Haben Sie bereits ein Konto? <Link href="/" className="text-primary hover:underline">Anmelden</Link>
             </p>
           </CardFooter>
         </Card>

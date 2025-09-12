@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { de } from 'date-fns/locale';
 import { setDefaultOptions } from 'date-fns';
+import { AuthProvider } from '@/context/auth-context';
 
 setDefaultOptions({ locale: de });
 
@@ -24,7 +25,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

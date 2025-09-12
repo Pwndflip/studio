@@ -1,3 +1,5 @@
+"use client";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -8,14 +10,41 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { User, Database } from "lucide-react";
+import { User, Database, LogOut } from "lucide-react";
 import Link from "next/link";
+import { AuthProvider, useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { getAuth, signOut } from "firebase/auth";
+import { app } from "@/lib/firebase";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const auth = getAuth(app);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/');
+  };
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <Database className="h-8 w-8 animate-pulse text-primary" />
+          <p className="text-muted-foreground">Lade Benutzerdaten...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6 z-10">
@@ -30,19 +59,22 @@ export default function DashboardLayout({
             <Button variant="secondary" size="icon" className="rounded-full">
               <Avatar>
                 <AvatarFallback>
-                  <User/>
+                  <User />
                 </AvatarFallback>
               </Avatar>
               <span className="sr-only">Benutzermenü umschalten</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Mein Konto</DropdownMenuLabel>
+            <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Einstellungen</DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
+            <DropdownMenuItem disabled>Einstellungen</DropdownMenuItem>
+            <DropdownMenuItem disabled>Support</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Abmelden</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Abmelden</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
@@ -50,5 +82,17 @@ export default function DashboardLayout({
         {children}
       </main>
     </div>
+  );
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AuthProvider>
+      <ProtectedDashboardLayout>{children}</ProtectedDashboardLayout>
+    </AuthProvider>
   );
 }
