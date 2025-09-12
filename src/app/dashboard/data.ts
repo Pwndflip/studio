@@ -1,5 +1,3 @@
-import { format } from 'date-fns';
-
 export type Status = 
   | "Abgeschlossen"
   | "Ersatzteil Bestellt"
@@ -20,7 +18,7 @@ export const STATUSES: { value: Status; label: string }[] = [
 ];
 
 export interface Customer {
-  id: string;
+  id?: string;
   name: string;
   adresse: string;
   telefon: string;

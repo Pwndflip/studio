@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { ref, onValue, set, push, remove, get } from 'firebase/database';
+import { ref, onValue, set, push, remove } from 'firebase/database';
 import type { Customer, Status } from './data';
 import { CustomerList } from '@/components/customer-list';
 import { DashboardHeader } from '@/components/dashboard-header';
@@ -82,13 +82,13 @@ export default function DashboardPage() {
   const handleSaveCustomer = (customerData: Omit<Customer, 'id'> & { id?: string }) => {
     if (customerData.id) { // Editing existing customer
       const customerRef = ref(db, `einträge/${customerData.id}`);
-      const updatedCustomer = { ...customerData, notizEditDate: new Date().toLocaleDateString('de-DE') };
+      const updatedCustomer: Partial<Customer> = { ...customerData, notizEditDate: new Date().toLocaleDateString('de-DE') };
       delete updatedCustomer.id; // Don't save id inside the customer object in DB
       set(customerRef, updatedCustomer);
     } else { // Adding new customer
       const customersRef = ref(db, 'einträge');
       const newCustomerRef = push(customersRef);
-      const newCustomerData = { ...customerData };
+      const newCustomerData: Partial<Customer> = { ...customerData };
       delete newCustomerData.id;
       set(newCustomerRef, newCustomerData);
     }

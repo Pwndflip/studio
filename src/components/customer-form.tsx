@@ -103,7 +103,12 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onSave(values);
+    // Format date back to yyyy-MM-dd before saving
+    const submissionValues = {
+        ...values,
+        datum: format(parseISO(values.datum), 'yyyy-MM-dd'),
+    };
+    onSave(submissionValues);
     toast({
       title: "Kunde gespeichert",
       description: `Die Daten von ${values.name} wurden erfolgreich gespeichert.`,
@@ -259,7 +264,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
 
         <div className="flex justify-between pt-4">
           <div>
-            {customer && (
+            {customer && customer.id && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button type="button" variant="destructive" className="bg-red-600 hover:bg-red-700 text-white">
@@ -276,7 +281,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onDelete(customer.id)} className="bg-destructive hover:bg-destructive/90">
+                    <AlertDialogAction onClick={() => onDelete(customer.id!)} className="bg-destructive hover:bg-destructive/90">
                       Fortsetzen
                     </AlertDialogAction>
                   </AlertDialogFooter>
