@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import type { Customer, Status } from './data';
 import { CustomerList } from '@/components/customer-list';
 import { DashboardHeader } from '@/components/dashboard-header';
@@ -9,6 +9,7 @@ import { initialCustomers } from './data';
 
 // Helper to generate a unique enough ID for local state
 let nextId = initialCustomers.length + 1;
+const ITEMS_PER_PAGE = 25;
 
 export default function DashboardPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -19,6 +20,7 @@ export default function DashboardPage() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
   useEffect(() => {
     // Initialize customers from the local data file
@@ -37,6 +39,8 @@ export default function DashboardPage() {
   }, []);
 
   const filteredCustomers = useMemo(() => {
+    // Reset visible count when filters change
+    setVisibleCount(ITEMS_PER_PAGE);
     return customers.filter((customer) => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
@@ -52,6 +56,25 @@ export default function DashboardPage() {
       return matchesSearch && matchesStatus && matchesDevice;
     });
   }, [customers, searchQuery, statusFilter, deviceFilter]);
+
+  const paginatedCustomers = useMemo(() => {
+    return filteredCustomers.slice(0, visibleCount);
+  }, [filteredCustomers, visibleCount]);
+  
+  const handleScroll = useCallback(() => {
+    // Load more items when user is 100px from the bottom
+    if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 100) {
+      if (visibleCount < filteredCustomers.length) {
+         setVisibleCount(prevCount => prevCount + ITEMS_PER_PAGE);
+      }
+    }
+  }, [visibleCount, filteredCustomers.length]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
 
   const handleAddNew = () => {
     setEditingCustomer(null);
@@ -106,10 +129,10 @@ export default function DashboardPage() {
             </div>
          </div>
       ) : (
-        <CustomerList customers={filteredCustomers} onEdit={handleEdit} />
+        <CustomerList customers={paginatedCustomers} onEdit={handleEdit} />
       )}
       <footer className="text-center text-sm text-muted-foreground mt-4">
-        {filteredCustomers.length} von {customers.length} Einträgen angezeigt
+        {paginatedCustomers.length} von {filteredCustomers.length} Einträgen angezeigt
       </footer>
       <CustomerFormDialog
         isOpen={isFormOpen}
