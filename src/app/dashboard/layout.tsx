@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { User, Zap } from "lucide-react";
+import { User, Database } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardLayout({
@@ -21,8 +21,8 @@ export default function DashboardLayout({
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6 z-10">
         <nav className="flex-1">
           <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold md:text-base">
-            <Zap className="h-6 w-6 text-primary" />
-            <span className="font-headline font-bold">KundenAI</span>
+            <Database className="h-6 w-6 text-primary" />
+            <span className="font-headline font-bold">WGM-Daten</span>
           </Link>
         </nav>
         <DropdownMenu>

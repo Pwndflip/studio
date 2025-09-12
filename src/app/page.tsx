@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Zap } from "lucide-react";
+import { Database } from "lucide-react";
 
 export default function LoginPage() {
   return (
@@ -10,15 +10,15 @@ export default function LoginPage() {
         <Card className="shadow-2xl">
           <CardHeader className="text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
-              <Zap className="h-8 w-8 text-primary-foreground" />
+              <Database className="h-8 w-8 text-primary-foreground" />
             </div>
             <CardTitle className="text-3xl font-bold font-headline">
-              KundenAI
+              WGM-Daten
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-6 p-6">
             <p className="text-center text-muted-foreground">
-              Ihr KI-gestütztes Kundenmanagement-Tool.
+              Ihre zentrale Kunden- und Auftragsverwaltung.
             </p>
             <Button asChild className="w-full" size="lg">
               <Link href="/dashboard">Dashboard betreten</Link>

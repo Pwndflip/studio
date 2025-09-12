@@ -7,8 +7,8 @@ import { setDefaultOptions } from 'date-fns';
 setDefaultOptions({ locale: de });
 
 export const metadata: Metadata = {
-  title: 'KundenAI',
-  description: 'KI-gestütztes Kundenmanagement',
+  title: 'WGM-Daten',
+  description: 'Kundenverwaltung für WGM',
 };
 
 export default function RootLayout({
