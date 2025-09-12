@@ -40,16 +40,16 @@ import { de } from "date-fns/locale";
 const editableStringSchema = z.object({
   value: z.string(),
   lastEdited: z.string().optional(),
-});
+}).optional().nullable();
 
 const formSchema = z.object({
   id: z.string().optional(),
-  name: editableStringSchema.extend({ value: z.string().min(2, "Der Name muss mindestens 2 Zeichen lang sein.") }),
-  address: editableStringSchema.extend({ value: z.string().min(5, "Die Adresse muss mindestens 5 Zeichen lang sein.") }),
-  phone: editableStringSchema.extend({ value: z.string().min(7, "Bitte geben Sie eine gültige Telefonnummer ein.") }),
-  device: editableStringSchema.extend({ value: z.string().min(2, "Gerätename ist erforderlich.") }),
-  errorDescription: editableStringSchema.extend({ value: z.string().min(5, "Fehlerbeschreibung ist erforderlich.") }),
-  notes: editableStringSchema,
+  name: z.object({ value: z.string().min(2, "Der Name muss mindestens 2 Zeichen lang sein."), lastEdited: z.string().optional() }),
+  address: z.object({ value: z.string().min(5, "Die Adresse muss mindestens 5 Zeichen lang sein."), lastEdited: z.string().optional() }),
+  phone: z.object({ value: z.string().min(7, "Bitte geben Sie eine gültige Telefonnummer ein."), lastEdited: z.string().optional() }),
+  device: z.object({ value: z.string().min(2, "Gerätename ist erforderlich."), lastEdited: z.string().optional() }),
+  errorDescription: z.object({ value: z.string().min(5, "Fehlerbeschreibung ist erforderlich."), lastEdited: z.string().optional() }),
+  notes: z.object({ value: z.string(), lastEdited: z.string().optional() }).optional().nullable(),
   status: z.object({ value: z.enum(["in-progress", "completed", "submitted", "ready-for-pickup"]), lastEdited: z.string().optional() }),
   createdAt: z.string(),
 });
@@ -235,9 +235,9 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                     <div className="flex items-center justify-between">
                       <FormLabel>Interne Notizen</FormLabel>
                     </div>
-                    <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} className="flex-grow" /></FormControl>
+                    <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." value={field.value?.value ?? ""} onChange={e => field.onChange({ ...field.value, value: e.target.value })} className="flex-grow" /></FormControl>
                     <FormMessage />
-                    <FieldLastEdited date={field.value.lastEdited} />
+                    <FieldLastEdited date={field.value?.lastEdited} />
                   </FormItem>
                 )}
               />

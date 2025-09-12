@@ -33,15 +33,7 @@ export default function DashboardPage() {
         const uniqueDevices = [...new Set(sortedCustomers.map(c => c.device.value).sort())];
         setAllDevices(uniqueDevices);
       } else {
-        // If no data, populate with initial data
-        const initialDataRef = ref(db, 'customers');
-        const customerPromises = initialCustomers.map(customer => {
-            const newCustomerRef = push(initialDataRef);
-            return set(newCustomerRef, customer);
-        });
-        Promise.all(customerPromises).then(() => {
-            setCustomers(initialCustomers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-        });
+        setCustomers([]); // If no data, just set to empty array
       }
       setIsLoading(false);
     });
@@ -112,7 +104,15 @@ export default function DashboardPage() {
     } else { // Adding new customer
       const customersRef = ref(db, 'customers');
       const newCustomerRef = push(customersRef);
-      set(newCustomerRef, customerData);
+      const newCustomerData = { ...customerData };
+       // Ensure all fields have the object structure
+      (Object.keys(newCustomerData) as Array<keyof typeof newCustomerData>).forEach(key => {
+        if (key !== 'id' && key !== 'createdAt' && typeof newCustomerData[key] !== 'object') {
+          (newCustomerData as any)[key] = { value: (newCustomerData as any)[key] };
+        }
+      });
+      delete newCustomerData.id;
+      set(newCustomerRef, newCustomerData);
     }
     setIsFormOpen(false);
   };
