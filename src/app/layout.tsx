@@ -1,6 +1,10 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { de } from 'date-fns/locale';
+import { setDefaultOptions } from 'date-fns';
+
+setDefaultOptions({ locale: de });
 
 export const metadata: Metadata = {
   title: 'KundenAI',

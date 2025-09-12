@@ -6,6 +6,7 @@ import type { Customer, Status } from './data';
 import { CustomerList } from '@/components/customer-list';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { CustomerFormDialog } from '@/components/customer-form-dialog';
+import { format } from 'date-fns';
 
 export default function DashboardPage() {
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
@@ -42,23 +43,22 @@ export default function DashboardPage() {
     setIsFormOpen(true);
   };
 
-  const handleSaveCustomer = (customerData: Omit<Customer, 'id' | 'createdAt' | 'lastEdited'> & { id?: string }) => {
+  const handleSaveCustomer = (customerData: Omit<Customer, 'id' | 'lastEdited'> & { id?: string }) => {
     const now = new Date().toISOString();
     if (editingCustomer) {
       const updatedCustomer = { ...editingCustomer, ...customerData, lastEdited: now };
-      setCustomers(customers.map((c) => (c.id === updatedCustomer.id ? updatedCustomer : c)));
+      setCustomers(customers.map((c) => (c.id === updatedCustomer.id ? updatedCustomer : c)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     } else {
       const newCustomer: Customer = {
         ...customerData,
         id: Date.now().toString(),
-        createdAt: now,
         lastEdited: now,
       };
-      setCustomers([newCustomer, ...customers]);
+      setCustomers([newCustomer, ...customers].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     }
     setIsFormOpen(false);
   };
-
+  
   const handleDeleteCustomer = (customerId: string) => {
     setCustomers(customers.filter(c => c.id !== customerId));
     setIsFormOpen(false);

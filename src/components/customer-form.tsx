@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { refineNotesAction } from "@/app/actions";
 import type { Customer } from "@/app/dashboard/data";
 import { STATUSES } from "@/app/dashboard/data";
-import { Bot, Loader2, Trash2 } from "lucide-react";
+import { Bot, Loader2, Trash2, Calendar as CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -32,6 +32,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format, toDate } from "date-fns";
+import { de } from "date-fns/locale";
 
 const formSchema = z.object({
   name: z.string().min(2, "Der Name muss mindestens 2 Zeichen lang sein."),
@@ -41,11 +46,13 @@ const formSchema = z.object({
   errorDescription: z.string().min(5, "Fehlerbeschreibung ist erforderlich."),
   notes: z.string(),
   status: z.enum(["in-progress", "completed", "submitted", "ready-for-pickup"]),
+  createdAt: z.string(),
+  lastEdited: z.string(),
 });
 
 type CustomerFormProps = {
   customer: Customer | null;
-  onSave: (customer: z.infer<typeof formSchema>) => void;
+  onSave: (values: Omit<z.infer<typeof formSchema>, 'lastEdited'>) => void;
   onDelete: (customerId: string) => void;
   onDone: () => void;
 };
@@ -64,6 +71,8 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
       errorDescription: customer?.errorDescription || "",
       notes: customer?.notes || "",
       status: customer?.status || "submitted",
+      createdAt: customer?.createdAt || new Date().toISOString(),
+      lastEdited: customer?.lastEdited || new Date().toISOString(),
     },
   });
 
@@ -89,12 +98,16 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onSave(values);
+    // We don't want to save the lastEdited value from the form, it's auto-generated
+    const { lastEdited, ...submissionValues } = values;
+    onSave(submissionValues);
     toast({
       title: "Kunde gespeichert",
       description: `Die Daten von ${values.name} wurden erfolgreich gespeichert.`,
     });
   }
+
+  const lastEditedDate = toDate(form.watch("lastEdited"));
 
   return (
     <Form {...form}>
@@ -193,6 +206,63 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
               </FormItem>
             )}
           />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="createdAt"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Erstellungsdatum</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(toDate(field.value), "PPP", { locale: de })
+                        ) : (
+                          <span>Datum auswählen</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={toDate(field.value)}
+                      onSelect={(date) => field.onChange(date?.toISOString())}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                      locale={de}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+           {customer && (
+             <FormItem>
+                <FormLabel>Zuletzt bearbeitet</FormLabel>
+                <FormControl>
+                  <Input 
+                    readOnly 
+                    value={format(lastEditedDate, "dd.MM.yyyy, HH:mm:ss")}
+                    className="bg-muted"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+        </div>
         <div className="flex justify-between pt-4">
           <div>
             {customer && (
