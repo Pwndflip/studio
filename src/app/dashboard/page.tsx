@@ -7,7 +7,6 @@ import type { Customer, Status } from './data';
 import { CustomerList } from '@/components/customer-list';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { CustomerFormDialog } from '@/components/customer-form-dialog';
-import { initialCustomers } from './data';
 
 export default function DashboardPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -30,10 +29,10 @@ export default function DashboardPage() {
         }));
         const sortedCustomers = loadedCustomers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setCustomers(sortedCustomers);
-        const uniqueDevices = [...new Set(sortedCustomers.map(c => c.device.value).sort())];
+        const uniqueDevices = [...new Set(sortedCustomers.map(c => c.device).sort())];
         setAllDevices(uniqueDevices);
       } else {
-        setCustomers([]); // If no data, just set to empty array
+        setCustomers([]);
       }
       setIsLoading(false);
     });
@@ -45,14 +44,14 @@ export default function DashboardPage() {
     return customers.filter((customer) => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
-        customer.name.value.toLowerCase().includes(searchLower) ||
-        customer.phone.value.toLowerCase().includes(searchLower) ||
-        customer.address.value.toLowerCase().includes(searchLower) ||
-        customer.device.value.toLowerCase().includes(searchLower) ||
-        customer.status.value.toLowerCase().includes(searchLower);
+        customer.name.toLowerCase().includes(searchLower) ||
+        customer.phone.toLowerCase().includes(searchLower) ||
+        customer.address.toLowerCase().includes(searchLower) ||
+        customer.device.toLowerCase().includes(searchLower) ||
+        customer.status.toLowerCase().includes(searchLower);
 
-      const matchesStatus = statusFilter === 'all' || customer.status.value === statusFilter;
-      const matchesDevice = deviceFilter === 'all' || customer.device.value === deviceFilter;
+      const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
+      const matchesDevice = deviceFilter === 'all' || customer.device === deviceFilter;
 
       return matchesSearch && matchesStatus && matchesDevice;
     });
@@ -71,46 +70,13 @@ export default function DashboardPage() {
   const handleSaveCustomer = (customerData: Omit<Customer, 'id'> & { id?: string }) => {
     if (customerData.id) { // Editing existing customer
       const customerRef = ref(db, `customers/${customerData.id}`);
-      const updatedCustomer = { ...customerData };
+      const updatedCustomer = { ...customerData, lastEdited: new Date().toISOString() };
       delete updatedCustomer.id; // Don't save id inside the customer object in DB
-
-       // Create a deep copy to avoid direct state mutation
-      const originalCustomer = customers.find(c => c.id === customerData.id);
-      if(!originalCustomer) return;
-
-      const now = new Date().toISOString();
-      let hasChanged = false;
-
-      // Iterate over fields to update values and timestamps
-      for (const key in Omit<Customer, 'id'|'createdAt'>) {
-          const field = key as keyof Omit<Customer, 'id' | 'createdAt'>;
-          const oldValue = originalCustomer[field]?.value;
-          const newValue = customerData[field]?.value;
-
-          if (oldValue !== newValue) {
-            (updatedCustomer[field] as any) = {
-              value: newValue,
-              lastEdited: now,
-            };
-            hasChanged = true;
-          } else {
-            (updatedCustomer[field] as any) = originalCustomer[field];
-          }
-      }
-
-      if(hasChanged) {
-        set(customerRef, updatedCustomer);
-      }
+      set(customerRef, updatedCustomer);
     } else { // Adding new customer
       const customersRef = ref(db, 'customers');
       const newCustomerRef = push(customersRef);
       const newCustomerData = { ...customerData };
-       // Ensure all fields have the object structure
-      (Object.keys(newCustomerData) as Array<keyof typeof newCustomerData>).forEach(key => {
-        if (key !== 'id' && key !== 'createdAt' && typeof newCustomerData[key] !== 'object') {
-          (newCustomerData as any)[key] = { value: (newCustomerData as any)[key] };
-        }
-      });
       delete newCustomerData.id;
       set(newCustomerRef, newCustomerData);
     }
