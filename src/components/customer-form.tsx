@@ -131,7 +131,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Telefonnummer</FormLabel>
-                  <FormControl><Input placeholder="555-123-4567" {...field} /></FormControl>
+                  <FormControl><Input placeholder="+49 123 4567890" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
