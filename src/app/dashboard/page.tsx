@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { ref, onValue, set, push, remove } from 'firebase/database';
+import { ref, onValue, set, push, remove, get } from 'firebase/database';
 import type { Customer, Status } from './data';
 import { CustomerList } from '@/components/customer-list';
 import { DashboardHeader } from '@/components/dashboard-header';
@@ -21,6 +21,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const customersRef = ref(db, 'einträge');
+    
     const unsubscribe = onValue(customersRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -28,11 +29,21 @@ export default function DashboardPage() {
           id: key,
           ...data[key],
         }));
-        const sortedCustomers = loadedCustomers.sort((a, b) => new Date(b.datum).getTime() - new Date(a.datum).getTime());
+        const sortedCustomers = loadedCustomers.sort((a, b) => {
+            const dateA = a.datum ? new Date(a.datum).getTime() : 0;
+            const dateB = b.datum ? new Date(b.datum).getTime() : 0;
+            return dateB - dateA;
+        });
         setCustomers(sortedCustomers);
-        const uniqueDevices = [...new Set(sortedCustomers.map(c => c.gerät).sort())];
+        const uniqueDevices = [...new Set(sortedCustomers.map(c => c.gerät).filter(Boolean).sort())];
         setAllDevices(uniqueDevices);
       } else {
+        // If no data, populate with initial customers
+        const customersRef = ref(db, 'einträge');
+        initialCustomers.forEach(customer => {
+            const newCustomerRef = push(customersRef);
+            set(newCustomerRef, customer);
+        });
         setCustomers([]);
       }
       setIsLoading(false);

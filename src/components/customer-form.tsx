@@ -33,7 +33,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { format, toDate, parseISO } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 import { de } from "date-fns/locale";
 
 const formSchema = z.object({
@@ -61,10 +61,33 @@ type CustomerFormProps = {
 export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFormProps) {
   const { toast } = useToast();
 
+  const parseDate = (dateString: string | undefined): Date | null => {
+    if (!dateString) return null;
+    
+    // Try parsing 'yyyy-MM-dd' ISO format first
+    let date = parseISO(dateString);
+    if (isValid(date)) return date;
+    
+    // Try parsing 'dd.MM.yyyy' format
+    const parts = dateString.split('.');
+    if (parts.length === 3) {
+      date = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+      if (isValid(date)) return date;
+    }
+    
+    date = new Date(dateString);
+    if (isValid(date)) return date;
+
+    return null; 
+  }
+
+  const defaultDatum = customer?.datum ? parseDate(customer.datum) : new Date();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: customer ? {
-      ...customer
+      ...customer,
+      datum: defaultDatum?.toISOString() ?? new Date().toISOString(),
     } : {
       name: "",
       adresse: "",
@@ -74,6 +97,8 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
       notiz: "",
       status: "In Werkstatt-Prüfüng",
       datum: new Date().toISOString(),
+      fehlercode: "",
+      typ: "",
     },
   });
 
@@ -85,15 +110,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
     });
   }
   
-  const lastEditedDateStr = customer?.notizEditDate;
-  let lastEditedDate: Date | null = null;
-  if (lastEditedDateStr) {
-    const parts = lastEditedDateStr.split('.');
-    if (parts.length === 3) {
-      lastEditedDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-    }
-  }
-
+  const lastEditedDate = parseDate(customer?.notizEditDate);
 
   return (
     <Form {...form}>
@@ -192,7 +209,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={parseISO(field.value)}
+                          selected={field.value ? parseISO(field.value) : undefined}
                           onSelect={(date) => field.onChange(date?.toISOString())}
                           disabled={(date) =>
                             date > new Date() || date < new Date("1900-01-01")

@@ -6,7 +6,8 @@ export type Status =
   | "Fertig Für Auslieferung"
   | "Gerät wird von Kunden Gebracht"
   | "Gerät wird von uns abgeholt"
-  | "In Werkstatt-Prüfüng";
+  | "In Werkstatt-Prüfüng"
+  | "";
 
 
 export const STATUSES: { value: Status; label: string }[] = [
@@ -33,5 +34,18 @@ export interface Customer {
   typ?: string;
 }
 
-// This is not used anymore since we are fetching from the database, but keeping it for reference
-export const initialCustomers: Omit<Customer, 'id'>[] = [];
+export const initialCustomers: Omit<Customer, 'id'>[] = [
+    {
+      "adresse": ",",
+      "datum": "2025-07-21",
+      "fehlercode": ",",
+      "gerät": "Bosch Trockner",
+      "name": "Keusenhoff",
+      "notiz": "Kunde selbst gebracht. 25 nicht bez. 75-90 €",
+      "notizEditDate": "21.07.2025",
+      "problem": "Reinigung",
+      "status": "Abgeschlossen",
+      "telefon": "01784978094",
+      "typ": "KD"
+    }
+];

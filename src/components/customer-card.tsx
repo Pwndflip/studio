@@ -19,20 +19,26 @@ const statusColors: Record<string, string> = {
 export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit: () => void; }) {
   const displayDateStr = customer.notizEditDate || customer.datum;
   
-  // Handle different date formats gracefully
   const parseDate = (dateString: string | undefined): Date | null => {
     if (!dateString) return null;
+    
+    // Try parsing 'yyyy-MM-dd' ISO format first
     let date = parseISO(dateString);
     if (isValid(date)) return date;
     
-    // Try parsing 'dd.MM.yyyy'
+    // Try parsing 'dd.MM.yyyy' format
     const parts = dateString.split('.');
     if (parts.length === 3) {
-      date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      // Note: new Date(year, monthIndex, day)
+      date = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
       if (isValid(date)) return date;
     }
     
-    return null; // Return null if parsing fails
+    // Fallback for other potential string formats that Date.parse might handle
+    date = new Date(dateString);
+    if (isValid(date)) return date;
+    
+    return null; // Return null if all parsing fails
   }
 
   const displayDate = parseDate(displayDateStr);
