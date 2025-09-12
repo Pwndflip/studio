@@ -70,7 +70,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
       device: customer?.device || "",
       errorDescription: customer?.errorDescription || "",
       notes: customer?.notes || "",
-      status: customer?.status || "submitted",
+      status: customer?.status || "in-progress",
       createdAt: customer?.createdAt || new Date().toISOString(),
       lastEdited: customer?.lastEdited || new Date().toISOString(),
     },
@@ -302,3 +302,5 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
     </Form>
   );
 }
+
+    
