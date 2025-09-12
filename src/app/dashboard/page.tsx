@@ -7,6 +7,7 @@ import type { Customer, Status } from './data';
 import { CustomerList } from '@/components/customer-list';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { CustomerFormDialog } from '@/components/customer-form-dialog';
+import { initialCustomers } from './data';
 
 export default function DashboardPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -19,7 +20,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const customersRef = ref(db, 'customers');
+    const customersRef = ref(db, 'einträge');
     const unsubscribe = onValue(customersRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -27,9 +28,9 @@ export default function DashboardPage() {
           id: key,
           ...data[key],
         }));
-        const sortedCustomers = loadedCustomers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        const sortedCustomers = loadedCustomers.sort((a, b) => new Date(b.datum).getTime() - new Date(a.datum).getTime());
         setCustomers(sortedCustomers);
-        const uniqueDevices = [...new Set(sortedCustomers.map(c => c.device).sort())];
+        const uniqueDevices = [...new Set(sortedCustomers.map(c => c.gerät).sort())];
         setAllDevices(uniqueDevices);
       } else {
         setCustomers([]);
@@ -44,14 +45,14 @@ export default function DashboardPage() {
     return customers.filter((customer) => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
-        customer.name.toLowerCase().includes(searchLower) ||
-        customer.phone.toLowerCase().includes(searchLower) ||
-        customer.address.toLowerCase().includes(searchLower) ||
-        customer.device.toLowerCase().includes(searchLower) ||
-        customer.status.toLowerCase().includes(searchLower);
+        (customer.name?.toLowerCase() || '').includes(searchLower) ||
+        (customer.telefon?.toLowerCase() || '').includes(searchLower) ||
+        (customer.adresse?.toLowerCase() || '').includes(searchLower) ||
+        (customer.gerät?.toLowerCase() || '').includes(searchLower) ||
+        (customer.status?.toLowerCase() || '').includes(searchLower);
 
       const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
-      const matchesDevice = deviceFilter === 'all' || customer.device === deviceFilter;
+      const matchesDevice = deviceFilter === 'all' || customer.gerät === deviceFilter;
 
       return matchesSearch && matchesStatus && matchesDevice;
     });
@@ -69,12 +70,12 @@ export default function DashboardPage() {
 
   const handleSaveCustomer = (customerData: Omit<Customer, 'id'> & { id?: string }) => {
     if (customerData.id) { // Editing existing customer
-      const customerRef = ref(db, `customers/${customerData.id}`);
-      const updatedCustomer = { ...customerData, lastEdited: new Date().toISOString() };
+      const customerRef = ref(db, `einträge/${customerData.id}`);
+      const updatedCustomer = { ...customerData, notizEditDate: new Date().toLocaleDateString('de-DE') };
       delete updatedCustomer.id; // Don't save id inside the customer object in DB
       set(customerRef, updatedCustomer);
     } else { // Adding new customer
-      const customersRef = ref(db, 'customers');
+      const customersRef = ref(db, 'einträge');
       const newCustomerRef = push(customersRef);
       const newCustomerData = { ...customerData };
       delete newCustomerData.id;
@@ -84,7 +85,7 @@ export default function DashboardPage() {
   };
   
   const handleDeleteCustomer = (customerId: string) => {
-    const customerRef = ref(db, `customers/${customerId}`);
+    const customerRef = ref(db, `einträge/${customerId}`);
     remove(customerRef);
     setIsFormOpen(false);
   }

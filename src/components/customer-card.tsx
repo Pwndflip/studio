@@ -5,24 +5,37 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MapPin, Phone, MessageSquare, Computer, Wrench, User, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, toDate } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 
-const statusColors: Record<Status, string> = {
-  "in-progress": "bg-yellow-400/20 text-yellow-700 border-yellow-400/30 hover:bg-yellow-400/30 dark:text-yellow-400",
-  "completed": "bg-green-400/20 text-green-700 border-green-400/30 hover:bg-green-400/30 dark:text-green-400",
-  "submitted": "bg-blue-400/20 text-blue-700 border-blue-400/30 hover:bg-blue-400/30 dark:text-blue-400",
-  "ready-for-pickup": "bg-purple-400/20 text-purple-700 border-purple-400/30 hover:bg-purple-400/30 dark:text-purple-400",
+const statusColors: Record<string, string> = {
+  "In Werkstatt-Prüfüng": "bg-blue-400/20 text-blue-700 border-blue-400/30 hover:bg-blue-400/30 dark:text-blue-400",
+  "Abgeschlossen": "bg-green-400/20 text-green-700 border-green-400/30 hover:bg-green-400/30 dark:text-green-400",
+  "Ersatzteil Bestellt": "bg-orange-400/20 text-orange-700 border-orange-400/30 hover:bg-orange-400/30 dark:text-orange-400",
+  "Fertig Für Auslieferung": "bg-purple-400/20 text-purple-700 border-purple-400/30 hover:bg-purple-400/30 dark:text-purple-400",
+  "Gerät wird von Kunden Gebracht": "bg-pink-400/20 text-pink-700 border-pink-400/30 hover:bg-pink-400/30 dark:text-pink-400",
+  "Gerät wird von uns abgeholt": "bg-yellow-400/20 text-yellow-700 border-yellow-400/30 hover:bg-yellow-400/30 dark:text-yellow-400",
 };
 
 export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit: () => void; }) {
-  const statusLabels: Record<Status, string> = {
-    'in-progress': 'In Bearbeitung',
-    'completed': 'Abgeschlossen',
-    'submitted': 'Eingereicht',
-    'ready-for-pickup': 'Abholbereit',
-  };
+  const displayDateStr = customer.notizEditDate || customer.datum;
+  
+  // Handle different date formats gracefully
+  const parseDate = (dateString: string | undefined): Date | null => {
+    if (!dateString) return null;
+    let date = parseISO(dateString);
+    if (isValid(date)) return date;
+    
+    // Try parsing 'dd.MM.yyyy'
+    const parts = dateString.split('.');
+    if (parts.length === 3) {
+      date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      if (isValid(date)) return date;
+    }
+    
+    return null; // Return null if parsing fails
+  }
 
-  const displayDate = customer.lastEdited ? toDate(customer.lastEdited) : toDate(customer.createdAt);
+  const displayDate = parseDate(displayDateStr);
 
   return (
     <Card className="flex h-full flex-col transition-shadow hover:shadow-lg">
@@ -37,37 +50,41 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
             <div>
               <CardTitle className="font-headline">{customer.name}</CardTitle>
               <CardDescription>
-                <Badge variant="outline" className={cn("mt-1 capitalize", statusColors[customer.status])}>
-                  {statusLabels[customer.status]}
-                </Badge>
+                 {customer.status && (
+                    <Badge variant="outline" className={cn("mt-1 capitalize", statusColors[customer.status] || "bg-gray-400/20 text-gray-700 border-gray-400/30")}>
+                        {customer.status}
+                    </Badge>
+                 )}
               </CardDescription>
             </div>
           </div>
-          <div className="text-xs text-muted-foreground flex items-center gap-1 shrink-0">
-            <CalendarDays className="w-3 h-3"/>
-            <span>{format(displayDate, 'dd/MM/yyyy')}</span>
-          </div>
+          {displayDate && (
+            <div className="text-xs text-muted-foreground flex items-center gap-1 shrink-0">
+                <CalendarDays className="w-3 h-3"/>
+                <span>{format(displayDate, 'dd.MM.yyyy')}</span>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="flex-grow space-y-3 text-sm">
         <div className="flex items-start gap-3 text-muted-foreground">
           <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-          <span className="flex-1">{customer.address}</span>
+          <span className="flex-1">{customer.adresse}</span>
         </div>
         <div className="flex items-center gap-3 text-muted-foreground">
           <Phone className="h-4 w-4 shrink-0" />
-          <span>{customer.phone}</span>
+          <span>{customer.telefon}</span>
         </div>
         <div className="flex items-start gap-3">
           <Computer className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
           <div>
-            <strong>{customer.device}:</strong>
-            <span className="text-muted-foreground ml-1">{customer.errorDescription}</span>
+            <strong>{customer.gerät}:</strong>
+            <span className="text-muted-foreground ml-1">{customer.problem}</span>
           </div>
         </div>
         <div className="flex items-start gap-3 text-muted-foreground">
           <MessageSquare className="h-4 w-4 mt-0.5 shrink-0" />
-          <p className="line-clamp-2 flex-1">{customer.notes}</p>
+          <p className="line-clamp-2 flex-1">{customer.notiz}</p>
         </div>
       </CardContent>
       <CardFooter>

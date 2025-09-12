@@ -11,7 +11,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,20 +33,22 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { format, toDate } from "date-fns";
+import { format, toDate, parseISO } from "date-fns";
 import { de } from "date-fns/locale";
 
 const formSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(2, "Der Name muss mindestens 2 Zeichen lang sein."),
-  address: z.string().min(5, "Die Adresse muss mindestens 5 Zeichen lang sein."),
-  phone: z.string().min(7, "Bitte geben Sie eine gültige Telefonnummer ein."),
-  device: z.string().min(2, "Gerätename ist erforderlich."),
-  errorDescription: z.string().min(5, "Fehlerbeschreibung ist erforderlich."),
-  notes: z.string().optional().nullable(),
-  status: z.enum(["in-progress", "completed", "submitted", "ready-for-pickup"]),
-  createdAt: z.string(),
-  lastEdited: z.string().optional(),
+  adresse: z.string().optional().nullable(),
+  telefon: z.string().optional().nullable(),
+  gerät: z.string().min(2, "Gerätename ist erforderlich."),
+  problem: z.string().min(5, "Fehlerbeschreibung ist erforderlich."),
+  notiz: z.string().optional().nullable(),
+  status: z.string().optional().nullable(),
+  datum: z.string(),
+  notizEditDate: z.string().optional().nullable(),
+  fehlercode: z.string().optional().nullable(),
+  typ: z.string().optional().nullable(),
 });
 
 type CustomerFormProps = {
@@ -66,13 +67,13 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
       ...customer
     } : {
       name: "",
-      address: "",
-      phone: "",
-      device: "",
-      errorDescription: "",
-      notes: "",
-      status: "in-progress",
-      createdAt: new Date().toISOString(),
+      adresse: "",
+      telefon: "",
+      gerät: "",
+      problem: "",
+      notiz: "",
+      status: "In Werkstatt-Prüfüng",
+      datum: new Date().toISOString(),
     },
   });
 
@@ -84,7 +85,15 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
     });
   }
   
-  const lastEditedDate = customer?.lastEdited || customer?.createdAt;
+  const lastEditedDateStr = customer?.notizEditDate;
+  let lastEditedDate: Date | null = null;
+  if (lastEditedDateStr) {
+    const parts = lastEditedDateStr.split('.');
+    if (parts.length === 3) {
+      lastEditedDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+    }
+  }
+
 
   return (
     <Form {...form}>
@@ -104,22 +113,22 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             />
             <FormField
               control={form.control}
-              name="phone"
+              name="telefon"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Telefonnummer</FormLabel>
-                  <FormControl><Input placeholder="+49 176 12345678" {...field} /></FormControl>
+                  <FormControl><Input placeholder="+49 176 12345678" {...field} value={field.value ?? ""} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
                 control={form.control}
-                name="address"
+                name="adresse"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Adresse</FormLabel>
-                    <FormControl><Input placeholder="Musterstraße 123, 12345 Musterstadt" {...field} /></FormControl>
+                    <FormControl><Input placeholder="Musterstraße 123, 12345 Musterstadt" {...field} value={field.value ?? ""} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -127,7 +136,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="device"
+                name="gerät"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Gerät</FormLabel>
@@ -142,7 +151,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
                       <FormControl>
                         <SelectTrigger><SelectValue placeholder="Status auswählen" /></SelectTrigger>
                       </FormControl>
@@ -157,7 +166,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             </div>
              <FormField
                 control={form.control}
-                name="createdAt"
+                name="datum"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Erstellungsdatum</FormLabel>
@@ -172,7 +181,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                             )}
                           >
                             {field.value ? (
-                              format(toDate(field.value), "PPP", { locale: de })
+                              format(parseISO(field.value), "PPP", { locale: de })
                             ) : (
                               <span>Datum auswählen</span>
                             )}
@@ -183,7 +192,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={toDate(field.value)}
+                          selected={parseISO(field.value)}
                           onSelect={(date) => field.onChange(date?.toISOString())}
                           disabled={(date) =>
                             date > new Date() || date < new Date("1900-01-01")
@@ -201,10 +210,10 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
           <div className="space-y-4 flex flex-col">
              <FormField
                 control={form.control}
-                name="errorDescription"
+                name="problem"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fehlerbeschreibung</FormLabel>
+                    <FormLabel>Problembeschreibung</FormLabel>
                     <FormControl><Textarea placeholder="z.B. schleudert nicht, heizt nicht" {...field} value={field.value ?? ""} rows={5} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -212,7 +221,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
               />
             <FormField
                 control={form.control}
-                name="notes"
+                name="notiz"
                 render={({ field }) => (
                   <FormItem className="flex flex-col flex-grow">
                     <div className="flex items-center justify-between">
@@ -225,7 +234,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
               />
               {lastEditedDate && (
                 <div className="text-xs text-muted-foreground pt-1 text-right">
-                    Zuletzt bearbeitet: {format(toDate(lastEditedDate), "dd.MM.yyyy, HH:mm")}
+                    Zuletzt bearbeitet: {format(lastEditedDate, "dd.MM.yyyy")}
                 </div>
               )}
           </div>

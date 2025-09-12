@@ -42,7 +42,7 @@ export function DashboardHeader({
           />
         </div>
         <Select value={statusFilter} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="Nach Status filtern" />
           </SelectTrigger>
           <SelectContent>
