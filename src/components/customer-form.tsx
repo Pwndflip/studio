@@ -112,157 +112,160 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Vollständiger Name</FormLabel>
-                <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Telefonnummer</FormLabel>
-                <FormControl><Input placeholder="555-123-4567" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Adresse</FormLabel>
-                <FormControl><Input placeholder="Musterstraße 123, Musterstadt, Deutschland" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <FormField
-            control={form.control}
-            name="device"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Gerät</FormLabel>
-                <FormControl><Input placeholder="z.B. Siemens Waschmaschine" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-           <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue placeholder="Status auswählen" /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {STATUSES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <FormField
-            control={form.control}
-            name="errorDescription"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fehlerbeschreibung</FormLabel>
-                <FormControl><Textarea placeholder="z.B. schleudert nicht, heizt nicht" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex items-center justify-between">
-                  <FormLabel>Interne Notizen</FormLabel>
-                  <Button type="button" variant="ghost" size="sm" onClick={handleRefineNotes} disabled={isRefining}>
-                    {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
-                    Mit KI verfeinern
-                  </Button>
-                </div>
-                <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." {...field} rows={5} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="createdAt"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Erstellungsdatum</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Vollständiger Name</FormLabel>
+                  <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Telefonnummer</FormLabel>
+                  <FormControl><Input placeholder="555-123-4567" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Adresse</FormLabel>
+                    <FormControl><Input placeholder="Musterstraße 123, Musterstadt, Deutschland" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="device"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gerät</FormLabel>
+                    <FormControl><Input placeholder="z.B. Siemens Waschmaschine" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger><SelectValue placeholder="Status auswählen" /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {STATUSES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+             <FormField
+                control={form.control}
+                name="createdAt"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Erstellungsdatum</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(toDate(field.value), "PPP", { locale: de })
+                            ) : (
+                              <span>Datum auswählen</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={toDate(field.value)}
+                          onSelect={(date) => field.onChange(date?.toISOString())}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                          locale={de}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {customer && (
+                <FormItem>
+                    <FormLabel>Zuletzt bearbeitet</FormLabel>
                     <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(toDate(field.value), "PPP", { locale: de })
-                        ) : (
-                          <span>Datum auswählen</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
+                      <Input 
+                        readOnly 
+                        value={format(lastEditedDate, "dd.MM.yyyy, HH:mm:ss")}
+                        className="bg-muted"
+                      />
                     </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={toDate(field.value)}
-                      onSelect={(date) => field.onChange(date?.toISOString())}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                      locale={de}
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-           {customer && (
-             <FormItem>
-                <FormLabel>Zuletzt bearbeitet</FormLabel>
-                <FormControl>
-                  <Input 
-                    readOnly 
-                    value={format(lastEditedDate, "dd.MM.yyyy, HH:mm:ss")}
-                    className="bg-muted"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+          </div>
+          <div className="space-y-4 flex flex-col">
+             <FormField
+                control={form.control}
+                name="errorDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fehlerbeschreibung</FormLabel>
+                    <FormControl><Textarea placeholder="z.B. schleudert nicht, heizt nicht" {...field} rows={5} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col flex-grow">
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Interne Notizen</FormLabel>
+                      <Button type="button" variant="ghost" size="sm" onClick={handleRefineNotes} disabled={isRefining}>
+                        {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
+                        Mit KI verfeinern
+                      </Button>
+                    </div>
+                    <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." {...field} className="flex-grow" /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+          </div>
         </div>
+
         <div className="flex justify-between pt-4">
           <div>
             {customer && (
