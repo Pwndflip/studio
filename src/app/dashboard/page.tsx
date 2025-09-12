@@ -8,7 +8,7 @@ import { CustomerFormDialog } from '@/components/customer-form-dialog';
 import { initialCustomers } from './data';
 
 // Helper to generate a unique enough ID for local state
-let nextId = 100;
+let nextId = initialCustomers.length + 1;
 
 export default function DashboardPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -108,6 +108,9 @@ export default function DashboardPage() {
       ) : (
         <CustomerList customers={filteredCustomers} onEdit={handleEdit} />
       )}
+      <footer className="text-center text-sm text-muted-foreground mt-4">
+        {filteredCustomers.length} von {customers.length} Einträgen angezeigt
+      </footer>
       <CustomerFormDialog
         isOpen={isFormOpen}
         onOpenChange={setIsFormOpen}
