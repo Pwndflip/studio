@@ -11,6 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,21 +39,25 @@ import { cn } from "@/lib/utils";
 import { format, toDate } from "date-fns";
 import { de } from "date-fns/locale";
 
+const editableStringSchema = z.object({
+  value: z.string(),
+  lastEdited: z.string().optional(),
+});
+
 const formSchema = z.object({
-  name: z.string().min(2, "Der Name muss mindestens 2 Zeichen lang sein."),
-  address: z.string().min(5, "Die Adresse muss mindestens 5 Zeichen lang sein."),
-  phone: z.string().min(7, "Bitte geben Sie eine gültige Telefonnummer ein."),
-  device: z.string().min(2, "Gerätename ist erforderlich."),
-  errorDescription: z.string().min(5, "Fehlerbeschreibung ist erforderlich."),
-  notes: z.string(),
-  status: z.enum(["in-progress", "completed", "submitted", "ready-for-pickup"]),
+  name: editableStringSchema.extend({ value: z.string().min(2, "Der Name muss mindestens 2 Zeichen lang sein.") }),
+  address: editableStringSchema.extend({ value: z.string().min(5, "Die Adresse muss mindestens 5 Zeichen lang sein.") }),
+  phone: editableStringSchema.extend({ value: z.string().min(7, "Bitte geben Sie eine gültige Telefonnummer ein.") }),
+  device: editableStringSchema.extend({ value: z.string().min(2, "Gerätename ist erforderlich.") }),
+  errorDescription: editableStringSchema.extend({ value: z.string().min(5, "Fehlerbeschreibung ist erforderlich.") }),
+  notes: editableStringSchema,
+  status: z.object({ value: z.enum(["in-progress", "completed", "submitted", "ready-for-pickup"]), lastEdited: z.string().optional() }),
   createdAt: z.string(),
-  lastEdited: z.string(),
 });
 
 type CustomerFormProps = {
   customer: Customer | null;
-  onSave: (values: Omit<z.infer<typeof formSchema>, 'lastEdited'>) => void;
+  onSave: (values: z.infer<typeof formSchema>) => void;
   onDelete: (customerId: string) => void;
   onDone: () => void;
 };
@@ -63,22 +68,23 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: customer?.name || "",
-      address: customer?.address || "",
-      phone: customer?.phone || "",
-      device: customer?.device || "",
-      errorDescription: customer?.errorDescription || "",
-      notes: customer?.notes || "",
-      status: customer?.status || "in-progress",
-      createdAt: customer?.createdAt || new Date().toISOString(),
-      lastEdited: customer?.lastEdited || new Date().toISOString(),
+    defaultValues: customer ? {
+      ...customer
+    } : {
+      name: { value: "" },
+      address: { value: "" },
+      phone: { value: "" },
+      device: { value: "" },
+      errorDescription: { value: "" },
+      notes: { value: "" },
+      status: { value: "in-progress" },
+      createdAt: new Date().toISOString(),
     },
   });
 
   async function handleRefineNotes() {
     setIsRefining(true);
-    const currentNotes = form.getValues("notes");
+    const currentNotes = form.getValues("notes.value");
     const result = await refineNotesAction(currentNotes);
 
     if (result.error) {
@@ -88,7 +94,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
         description: result.error,
       });
     } else {
-      form.setValue("notes", result.refinedNotes, { shouldValidate: true });
+      form.setValue("notes.value", result.refinedNotes, { shouldValidate: true });
       toast({
         title: "Notizen verfeinert",
         description: "Die Kundennotizen wurden durch KI verbessert.",
@@ -98,16 +104,21 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // We don't want to save the lastEdited value from the form, it's auto-generated
-    const { lastEdited, ...submissionValues } = values;
-    onSave(submissionValues);
+    onSave(values);
     toast({
       title: "Kunde gespeichert",
-      description: `Die Daten von ${values.name} wurden erfolgreich gespeichert.`,
+      description: `Die Daten von ${values.name.value} wurden erfolgreich gespeichert.`,
     });
   }
-
-  const lastEditedDate = toDate(form.watch("lastEdited"));
+  
+  const FieldLastEdited = ({ date }: { date?: string }) => {
+    if (!date) return null;
+    return (
+        <FormDescription className="text-xs pt-1">
+            Zuletzt bearbeitet: {format(toDate(date), "dd.MM.yyyy, HH:mm")}
+        </FormDescription>
+    );
+  };
 
   return (
     <Form {...form}>
@@ -120,8 +131,9 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Vollständiger Name</FormLabel>
-                  <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
+                  <FormControl><Input placeholder="John Doe" {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} /></FormControl>
                   <FormMessage />
+                  <FieldLastEdited date={field.value.lastEdited} />
                 </FormItem>
               )}
             />
@@ -131,8 +143,9 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Telefonnummer</FormLabel>
-                  <FormControl><Input placeholder="+49 123 4567890" {...field} /></FormControl>
+                  <FormControl><Input placeholder="+49 123 4567890" {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} /></FormControl>
                   <FormMessage />
+                  <FieldLastEdited date={field.value.lastEdited} />
                 </FormItem>
               )}
             />
@@ -142,8 +155,9 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Adresse</FormLabel>
-                    <FormControl><Input placeholder="Musterstraße 123, Musterstadt, Deutschland" {...field} /></FormControl>
+                    <FormControl><Input placeholder="Musterstraße 123, Musterstadt, Deutschland" {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} /></FormControl>
                     <FormMessage />
+                    <FieldLastEdited date={field.value.lastEdited} />
                   </FormItem>
                 )}
               />
@@ -154,8 +168,9 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Gerät</FormLabel>
-                    <FormControl><Input placeholder="z.B. Siemens Waschmaschine" {...field} /></FormControl>
+                    <FormControl><Input placeholder="z.B. Siemens Waschmaschine" {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} /></FormControl>
                     <FormMessage />
+                    <FieldLastEdited date={field.value.lastEdited} />
                   </FormItem>
                 )}
               />
@@ -165,7 +180,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={(value) => field.onChange({ ...field.value, value })} defaultValue={field.value.value}>
                       <FormControl>
                         <SelectTrigger><SelectValue placeholder="Status auswählen" /></SelectTrigger>
                       </FormControl>
@@ -174,6 +189,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                       </SelectContent>
                     </Select>
                     <FormMessage />
+                    <FieldLastEdited date={field.value.lastEdited} />
                   </FormItem>
                 )}
               />
@@ -220,19 +236,6 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                   </FormItem>
                 )}
               />
-              {customer && (
-                <FormItem>
-                    <FormLabel>Zuletzt bearbeitet</FormLabel>
-                    <FormControl>
-                      <Input 
-                        readOnly 
-                        value={format(lastEditedDate, "dd.MM.yyyy, HH:mm:ss")}
-                        className="bg-muted"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
           </div>
           <div className="space-y-4 flex flex-col">
              <FormField
@@ -241,8 +244,9 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Fehlerbeschreibung</FormLabel>
-                    <FormControl><Textarea placeholder="z.B. schleudert nicht, heizt nicht" {...field} rows={5} /></FormControl>
+                    <FormControl><Textarea placeholder="z.B. schleudert nicht, heizt nicht" {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} rows={5} /></FormControl>
                     <FormMessage />
+                    <FieldLastEdited date={field.value.lastEdited} />
                   </FormItem>
                 )}
               />
@@ -258,8 +262,9 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                         Mit KI verfeinern
                       </Button>
                     </div>
-                    <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." {...field} className="flex-grow" /></FormControl>
+                    <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} className="flex-grow" /></FormControl>
                     <FormMessage />
+                    <FieldLastEdited date={field.value.lastEdited} />
                   </FormItem>
                 )}
               />
@@ -280,7 +285,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                   <AlertDialogHeader>
                     <AlertDialogTitle>Sind Sie absolut sicher?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird der Kundendatensatz für {customer.name} dauerhaft gelöscht.
+                      Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird der Kundendatensatz für {customer.name.value} dauerhaft gelöscht.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -302,5 +307,3 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
     </Form>
   );
 }
-
-    

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MapPin, Phone, MessageSquare, Computer, Wrench, User, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, toDate } from "date-fns";
 
 const statusColors: Record<Status, string> = {
   "in-progress": "bg-yellow-400/20 text-yellow-700 border-yellow-400/30 hover:bg-yellow-400/30 dark:text-yellow-400",
@@ -21,6 +21,26 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
     'submitted': 'Eingereicht',
     'ready-for-pickup': 'Abholbereit',
   };
+
+  const getLastEditedDate = () => {
+    const editDates: (string | undefined)[] = [
+        customer.name.lastEdited,
+        customer.address.lastEdited,
+        customer.phone.lastEdited,
+        customer.device.lastEdited,
+        customer.errorDescription.lastEdited,
+        customer.notes.lastEdited,
+        customer.status.lastEdited,
+    ];
+
+    const validDates = editDates.filter((d): d is string => !!d).map(d => toDate(d));
+    if (validDates.length > 0) {
+      const mostRecentDate = new Date(Math.max(...validDates.map(d => d.getTime())));
+      return mostRecentDate;
+    }
+    return toDate(customer.createdAt);
+  }
+
   return (
     <Card className="flex h-full flex-col transition-shadow hover:shadow-lg">
       <CardHeader>
@@ -32,39 +52,39 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
               </AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle className="font-headline">{customer.name}</CardTitle>
+              <CardTitle className="font-headline">{customer.name.value}</CardTitle>
               <CardDescription>
-                <Badge variant="outline" className={cn("mt-1 capitalize", statusColors[customer.status])}>
-                  {statusLabels[customer.status]}
+                <Badge variant="outline" className={cn("mt-1 capitalize", statusColors[customer.status.value])}>
+                  {statusLabels[customer.status.value]}
                 </Badge>
               </CardDescription>
             </div>
           </div>
           <div className="text-xs text-muted-foreground flex items-center gap-1 shrink-0">
             <CalendarDays className="w-3 h-3"/>
-            <span>{format(new Date(customer.lastEdited), 'dd/MM/yyyy')}</span>
+            <span>{format(getLastEditedDate(), 'dd/MM/yyyy')}</span>
           </div>
         </div>
       </CardHeader>
       <CardContent className="flex-grow space-y-3 text-sm">
         <div className="flex items-start gap-3 text-muted-foreground">
           <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-          <span className="flex-1">{customer.address}</span>
+          <span className="flex-1">{customer.address.value}</span>
         </div>
         <div className="flex items-center gap-3 text-muted-foreground">
           <Phone className="h-4 w-4 shrink-0" />
-          <span>{customer.phone}</span>
+          <span>{customer.phone.value}</span>
         </div>
         <div className="flex items-start gap-3">
           <Computer className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
           <div>
-            <strong>{customer.device}:</strong>
-            <span className="text-muted-foreground ml-1">{customer.errorDescription}</span>
+            <strong>{customer.device.value}:</strong>
+            <span className="text-muted-foreground ml-1">{customer.errorDescription.value}</span>
           </div>
         </div>
         <div className="flex items-start gap-3 text-muted-foreground">
           <MessageSquare className="h-4 w-4 mt-0.5 shrink-0" />
-          <p className="line-clamp-2 flex-1">{customer.notes}</p>
+          <p className="line-clamp-2 flex-1">{customer.notes.value}</p>
         </div>
       </CardContent>
       <CardFooter>

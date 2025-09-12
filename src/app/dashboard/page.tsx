@@ -2,11 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import { initialCustomers } from './data';
-import type { Customer, Status } from './data';
+import type { Customer, Status, EditableField } from './data';
 import { CustomerList } from '@/components/customer-list';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { CustomerFormDialog } from '@/components/customer-form-dialog';
-import { format } from 'date-fns';
 
 export default function DashboardPage() {
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
@@ -20,14 +19,14 @@ export default function DashboardPage() {
     return customers.filter((customer) => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
-        customer.name.toLowerCase().includes(searchLower) ||
-        customer.phone.toLowerCase().includes(searchLower) ||
-        customer.address.toLowerCase().includes(searchLower) ||
-        customer.device.toLowerCase().includes(searchLower) ||
-        customer.status.toLowerCase().includes(searchLower);
+        customer.name.value.toLowerCase().includes(searchLower) ||
+        customer.phone.value.toLowerCase().includes(searchLower) ||
+        customer.address.value.toLowerCase().includes(searchLower) ||
+        customer.device.value.toLowerCase().includes(searchLower) ||
+        customer.status.value.toLowerCase().includes(searchLower);
 
-      const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
-      const matchesDevice = deviceFilter === 'all' || customer.device === deviceFilter;
+      const matchesStatus = statusFilter === 'all' || customer.status.value === statusFilter;
+      const matchesDevice = deviceFilter === 'all' || customer.device.value === deviceFilter;
 
       return matchesSearch && matchesStatus && matchesDevice;
     });
@@ -43,16 +42,40 @@ export default function DashboardPage() {
     setIsFormOpen(true);
   };
 
-  const handleSaveCustomer = (customerData: Omit<Customer, 'id' | 'lastEdited'> & { id?: string }) => {
-    const now = new Date().toISOString();
+  const handleSaveCustomer = (customerData: Omit<Customer, 'id'> & { id?: string }) => {
     if (editingCustomer) {
-      const updatedCustomer = { ...editingCustomer, ...customerData, lastEdited: now };
-      setCustomers(customers.map((c) => (c.id === updatedCustomer.id ? updatedCustomer : c)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+      // Create a deep copy to avoid direct state mutation
+      const updatedCustomer = JSON.parse(JSON.stringify(editingCustomer));
+      
+      const now = new Date().toISOString();
+      let hasChanged = false;
+
+      // Iterate over fields to update values and timestamps
+      for (const key in customerData) {
+        if (key !== 'id' && key !== 'createdAt') {
+          const field = key as keyof Omit<Customer, 'id' | 'createdAt'>;
+          const oldValue = editingCustomer[field]?.value;
+          const newValue = customerData[field]?.value;
+
+          if (oldValue !== newValue) {
+            updatedCustomer[field] = {
+              value: newValue,
+              lastEdited: now,
+            };
+            hasChanged = true;
+          }
+        }
+      }
+      
+      if(hasChanged) {
+          setCustomers(customers.map((c) => (c.id === updatedCustomer.id ? updatedCustomer : c)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+      }
+
     } else {
+      // New customer
       const newCustomer: Customer = {
         ...customerData,
         id: Date.now().toString(),
-        lastEdited: now,
       };
       setCustomers([newCustomer, ...customers].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     }
@@ -64,7 +87,7 @@ export default function DashboardPage() {
     setIsFormOpen(false);
   }
 
-  const allDevices = useMemo(() => [...new Set(initialCustomers.map(c => c.device).sort())], []);
+  const allDevices = useMemo(() => [...new Set(initialCustomers.map(c => c.device.value).sort())], []);
 
   return (
     <>
