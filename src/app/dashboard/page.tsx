@@ -5,7 +5,6 @@ import type { Customer, Status } from './data';
 import { CustomerList } from '@/components/customer-list';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { CustomerFormDialog } from '@/components/customer-form-dialog';
-import { initialCustomers } from './data';
 import { db } from '@/lib/firebase';
 import { ref, onValue, set, push, remove } from 'firebase/database';
 import { format } from 'date-fns';
@@ -48,12 +47,8 @@ export default function DashboardPage() {
       setIsLoading(false);
     }, (error) => {
         console.error("Firebase read failed: ", error);
-        // Fallback to local data if there's an error (e.g. config not set)
-        console.log("Falling back to local data.");
-        const localCustomers = initialCustomers.map((c, i) => ({ ...c, id: `initial-${i}` }));
-        setCustomers(localCustomers);
-        const uniqueDevices = [...new Set(localCustomers.map(c => c.gerät).filter(Boolean).sort())];
-        setAllDevices(uniqueDevices);
+        alert("Could not connect to Firebase. Please check your configuration in src/lib/firebase.ts and ensure the database is accessible.");
+        setCustomers([]);
         setIsLoading(false);
     });
 
