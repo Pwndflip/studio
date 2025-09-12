@@ -5,15 +5,13 @@ import { getDatabase } from "firebase/database";
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
-// IMPORTANT: REPLACE WITH YOUR ACTUAL FIREBASE CONFIG
 const firebaseConfig = {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-  authDomain: "your-project-id.firebaseapp.com",
-  databaseURL: "https://your-project-id.firebaseio.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:000000000000000000"
+  "projectId": "studio-9752766556-ba34f",
+  "appId": "1:311216869920:web:eba73040a1ba69882da245",
+  "storageBucket": "studio-9752766556-ba34f.firebasestorage.app",
+  "apiKey": "AIzaSyCCjU_9RhsccnUwNN2FnwH7OLt2O22T7bU",
+  "authDomain": "studio-9752766556-ba34f.firebaseapp.com",
+  "databaseURL": "https://studio-9752766556-ba34f-default-rtdb.firebaseio.com"
 };
 
 // Initialize Firebase
