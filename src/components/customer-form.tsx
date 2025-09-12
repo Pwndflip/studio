@@ -17,11 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { refineNotesAction } from "@/app/actions";
 import type { Customer } from "@/app/dashboard/data";
 import { STATUSES } from "@/app/dashboard/data";
-import { Bot, Loader2, Trash2, Calendar as CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { Trash2, Calendar as CalendarIcon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,7 +62,6 @@ type CustomerFormProps = {
 
 export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFormProps) {
   const { toast } = useToast();
-  const [isRefining, setIsRefining] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -81,27 +78,6 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
       createdAt: new Date().toISOString(),
     },
   });
-
-  async function handleRefineNotes() {
-    setIsRefining(true);
-    const currentNotesValue = form.getValues("notes.value");
-    const result = await refineNotesAction(currentNotesValue);
-
-    if (result.error) {
-      toast({
-        variant: "destructive",
-        title: "KI-Verfeinerung fehlgeschlagen",
-        description: result.error,
-      });
-    } else {
-      form.setValue("notes.value", result.refinedNotes, { shouldValidate: true });
-      toast({
-        title: "Notizen verfeinert",
-        description: "Die Kundennotizen wurden durch KI verbessert.",
-      });
-    }
-    setIsRefining(false);
-  }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onSave(values);
@@ -143,7 +119,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Telefonnummer</FormLabel>
-                  <FormControl><Input placeholder="0176 12345678" {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} /></FormControl>
+                  <FormControl><Input placeholder="+49 176 12345678" {...field} value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} /></FormControl>
                   <FormMessage />
                   <FieldLastEdited date={field.value.lastEdited} />
                 </FormItem>
@@ -257,10 +233,6 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                   <FormItem className="flex flex-col flex-grow">
                     <div className="flex items-center justify-between">
                       <FormLabel>Interne Notizen</FormLabel>
-                      <Button type="button" variant="ghost" size="sm" onClick={handleRefineNotes} disabled={isRefining}>
-                        {isRefining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
-                        Mit KI verfeinern
-                      </Button>
                     </div>
                     <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." value={field.value.value} onChange={e => field.onChange({ ...field.value, value: e.target.value })} className="flex-grow" /></FormControl>
                     <FormMessage />
@@ -307,5 +279,3 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
     </Form>
   );
 }
-
-    
