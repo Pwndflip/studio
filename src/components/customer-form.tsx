@@ -43,6 +43,7 @@ const editableStringSchema = z.object({
 });
 
 const formSchema = z.object({
+  id: z.string().optional(),
   name: editableStringSchema.extend({ value: z.string().min(2, "Der Name muss mindestens 2 Zeichen lang sein.") }),
   address: editableStringSchema.extend({ value: z.string().min(5, "Die Adresse muss mindestens 5 Zeichen lang sein.") }),
   phone: editableStringSchema.extend({ value: z.string().min(7, "Bitte geben Sie eine gültige Telefonnummer ein.") }),
