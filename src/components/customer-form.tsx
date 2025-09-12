@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import type { Customer } from "@/app/dashboard/data";
-import { STATUSES } from "@/app/dashboard/data";
+import { STATUSES, TYPEN } from "@/app/dashboard/data";
 import { Trash2, Calendar as CalendarIcon } from "lucide-react";
 import {
   AlertDialog,
@@ -98,7 +98,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
       status: "In Werkstatt-Prüfüng",
       datum: new Date().toISOString(),
       fehlercode: "",
-      typ: "",
+      typ: "KD",
     },
   });
 
@@ -155,7 +155,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                   </FormItem>
                 )}
               />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="gerät"
@@ -179,6 +179,24 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                       </FormControl>
                       <SelectContent>
                         {STATUSES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="typ"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Typ</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
+                      <FormControl>
+                        <SelectTrigger><SelectValue placeholder="Typ auswählen" /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TYPEN.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />

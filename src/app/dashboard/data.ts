@@ -17,6 +17,11 @@ export const STATUSES: { value: Status; label: string }[] = [
   { value: 'In Werkstatt-Prüfüng', label: 'In Werkstatt-Prüfüng' },
 ];
 
+export const TYPEN = [
+  { value: 'KD', label: 'KD' },
+  { value: 'Rkl', label: 'Rkl' },
+];
+
 export interface Customer {
   id?: string;
   name: string;

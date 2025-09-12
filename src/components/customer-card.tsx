@@ -16,6 +16,11 @@ const statusColors: Record<string, string> = {
   "Gerät wird von uns abgeholt": "bg-yellow-400/20 text-yellow-700 border-yellow-400/30 hover:bg-yellow-400/30 dark:text-yellow-400",
 };
 
+const typColors: Record<string, string> = {
+  "KD": "bg-gray-400/20 text-gray-700 border-gray-400/30",
+  "Rkl": "bg-red-400/20 text-red-700 border-red-400/30",
+};
+
 export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit: () => void; }) {
   const displayDateStr = customer.notizEditDate || customer.datum;
   
@@ -55,10 +60,15 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
             </Avatar>
             <div>
               <CardTitle className="font-headline">{customer.name}</CardTitle>
-              <CardDescription>
+              <CardDescription className="flex items-center gap-1.5 flex-wrap">
                  {customer.status && (
                     <Badge variant="outline" className={cn("mt-1 capitalize", statusColors[customer.status] || "bg-gray-400/20 text-gray-700 border-gray-400/30")}>
                         {customer.status}
+                    </Badge>
+                 )}
+                 {customer.typ && (
+                    <Badge variant="outline" className={cn("mt-1", typColors[customer.typ] || "bg-gray-400/20 text-gray-700 border-gray-400/30")}>
+                        {customer.typ}
                     </Badge>
                  )}
               </CardDescription>
