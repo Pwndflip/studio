@@ -146,7 +146,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Gerät</FormLabel>
-                <FormControl><Input placeholder="iPhone 14 Pro" {...field} /></FormControl>
+                <FormControl><Input placeholder="z.B. Siemens Waschmaschine" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -176,7 +176,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Fehlerbeschreibung</FormLabel>
-                <FormControl><Textarea placeholder="z.B. gesprungener Bildschirm, lässt sich nicht einschalten" {...field} /></FormControl>
+                <FormControl><Textarea placeholder="z.B. schleudert nicht, heizt nicht" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
