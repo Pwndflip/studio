@@ -16,6 +16,9 @@ type CustomerFormDialogProps = {
   customer: Customer | null;
   onSave: (customer: Omit<Customer, 'id'> & { id?: string }) => void;
   onDelete: (customerId: string) => void;
+  onArchive: (customer: Customer) => void;
+  onUnarchive: (customer: Customer) => void;
+  isArchiveView: boolean;
 };
 
 export function CustomerFormDialog({
@@ -24,14 +27,15 @@ export function CustomerFormDialog({
   customer,
   onSave,
   onDelete,
+  onArchive,
+  onUnarchive,
+  isArchiveView
 }: CustomerFormDialogProps) {
   const title = customer ? "Kunde bearbeiten" : "Neuen Kunden hinzufügen";
   const description = customer
     ? "Aktualisieren Sie die Kundendetails unten."
     : "Füllen Sie das Formular aus, um einen neuen Kundendatensatz hinzuzufügen.";
 
-  // By re-mounting the form using a key, we ensure its state is reset
-  // when switching between adding and editing different customers.
   const key = customer ? customer.id : "new";
 
   return (
@@ -47,6 +51,9 @@ export function CustomerFormDialog({
               customer={customer}
               onSave={onSave}
               onDelete={onDelete}
+              onArchive={onArchive}
+              onUnarchive={onUnarchive}
+              isArchiveView={isArchiveView}
               onDone={() => onOpenChange(false)}
             />
         )}

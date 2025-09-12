@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import type { Customer } from "@/app/dashboard/data";
 import { STATUSES, TYPEN } from "@/app/dashboard/data";
-import { Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { Trash2, Calendar as CalendarIcon, Archive, ArchiveRestore } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,29 +55,26 @@ type CustomerFormProps = {
   customer: Customer | null;
   onSave: (values: z.infer<typeof formSchema>) => void;
   onDelete: (customerId: string) => void;
+  onArchive: (customer: Customer) => void;
+  onUnarchive: (customer: Customer) => void;
+  isArchiveView: boolean;
   onDone: () => void;
 };
 
-export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFormProps) {
+export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, onUnarchive, isArchiveView }: CustomerFormProps) {
   const { toast } = useToast();
 
   const parseDate = (dateString: string | undefined): Date | null => {
     if (!dateString) return null;
-    
-    // Try parsing 'yyyy-MM-dd' ISO format first
     let date = parseISO(dateString);
     if (isValid(date)) return date;
-    
-    // Try parsing 'dd.MM.yyyy' format
     const parts = dateString.split('.');
     if (parts.length === 3) {
       date = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
       if (isValid(date)) return date;
     }
-    
     date = new Date(dateString);
     if (isValid(date)) return date;
-
     return null; 
   }
 
@@ -103,7 +100,6 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Format date back to yyyy-MM-dd before saving
     const submissionValues = {
         ...values,
         datum: format(parseISO(values.datum), 'yyyy-MM-dd'),
@@ -116,6 +112,26 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
   }
   
   const lastEditedDate = parseDate(customer?.notizEditDate);
+
+  const handleArchive = () => {
+    if(customer) {
+        onArchive(customer);
+        toast({
+            title: "Kunde archiviert",
+            description: `Der Eintrag für ${customer.name} wurde ins Archiv verschoben.`,
+        });
+    }
+  }
+
+  const handleUnarchive = () => {
+    if(customer) {
+        onUnarchive(customer);
+        toast({
+            title: "Kunde dearchiviert",
+            description: `Der Eintrag für ${customer.name} wurde aus dem Archiv wiederhergestellt.`,
+        });
+    }
+  }
 
   return (
     <Form {...form}>
@@ -281,7 +297,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
         </div>
 
         <div className="flex justify-between pt-4">
-          <div>
+          <div className="flex gap-2">
             {customer && customer.id && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -306,6 +322,17 @@ export function CustomerForm({ customer, onSave, onDelete, onDone }: CustomerFor
                 </AlertDialogContent>
               </AlertDialog>
             )}
+             {customer && customer.id && (
+                isArchiveView ? (
+                    <Button type="button" variant="secondary" onClick={handleUnarchive}>
+                        <ArchiveRestore className="mr-2 h-4 w-4" /> Dearchivieren
+                    </Button>
+                ) : (
+                    <Button type="button" variant="secondary" onClick={handleArchive}>
+                        <Archive className="mr-2 h-4 w-4" /> Archivieren
+                    </Button>
+                )
+             )}
           </div>
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={onDone}>Abbrechen</Button>

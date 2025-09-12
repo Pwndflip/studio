@@ -13,6 +13,7 @@ const ITEMS_PER_PAGE = 25;
 
 export default function DashboardPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [archivedCustomers, setArchivedCustomers] = useState<Customer[]>([]);
   const [allDevices, setAllDevices] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<Status | 'all'>('all');
@@ -21,6 +22,7 @@ export default function DashboardPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [isArchiveView, setIsArchiveView] = useState(false);
 
   useEffect(() => {
     const customersRef = ref(db, 'einträge');
@@ -39,14 +41,12 @@ export default function DashboardPage() {
         });
 
         setCustomers(sortedCustomers);
-        const uniqueDevices = [...new Set(sortedCustomers.map(c => c.gerät).filter(Boolean).sort())];
-        setAllDevices(uniqueDevices);
       } else {
         setCustomers([]);
       }
       setIsLoading(false);
     }, (error) => {
-        console.error("Firebase read failed: ", error);
+        console.error("Firebase read failed on 'einträge': ", error);
         alert("Could not connect to Firebase. Please check your configuration in src/lib/firebase.ts and ensure the database is accessible.");
         setCustomers([]);
         setIsLoading(false);
@@ -55,10 +55,41 @@ export default function DashboardPage() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const archiveRef = ref(db, 'archiv');
+    const unsubscribe = onValue(archiveRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const loadedCustomers: Customer[] = Object.entries(data).map(([id, value]) => ({
+          id,
+          ...(value as Omit<Customer, 'id'>),
+        }));
+        const sortedCustomers = loadedCustomers.sort((a, b) => {
+            const dateA = a.datum ? new Date(a.datum).getTime() : 0;
+            const dateB = b.datum ? new Date(b.datum).getTime() : 0;
+            return dateB - dateA;
+        });
+        setArchivedCustomers(sortedCustomers);
+      } else {
+        setArchivedCustomers([]);
+      }
+    }, (error) => {
+        console.error("Firebase read failed on 'archiv': ", error);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const allCustomers = [...customers, ...archivedCustomers];
+    const uniqueDevices = [...new Set(allCustomers.map(c => c.gerät).filter(Boolean).sort())];
+    setAllDevices(uniqueDevices);
+  }, [customers, archivedCustomers]);
+
+  const sourceCustomers = useMemo(() => isArchiveView ? archivedCustomers : customers, [isArchiveView, customers, archivedCustomers]);
+
   const filteredCustomers = useMemo(() => {
-    // Reset visible count when filters change
     setVisibleCount(ITEMS_PER_PAGE);
-    return customers.filter((customer) => {
+    return sourceCustomers.filter((customer) => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         (customer.name?.toLowerCase() || '').includes(searchLower) ||
@@ -72,14 +103,13 @@ export default function DashboardPage() {
 
       return matchesSearch && matchesStatus && matchesDevice;
     });
-  }, [customers, searchQuery, statusFilter, deviceFilter]);
+  }, [sourceCustomers, searchQuery, statusFilter, deviceFilter]);
 
   const paginatedCustomers = useMemo(() => {
     return filteredCustomers.slice(0, visibleCount);
   }, [filteredCustomers, visibleCount]);
   
   const handleScroll = useCallback(() => {
-    // Load more items when user is 100px from the bottom
     if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 100) {
       if (visibleCount < filteredCustomers.length) {
          setVisibleCount(prevCount => prevCount + ITEMS_PER_PAGE);
@@ -92,7 +122,6 @@ export default function DashboardPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-
   const handleAddNew = () => {
     setEditingCustomer(null);
     setIsFormOpen(true);
@@ -104,15 +133,16 @@ export default function DashboardPage() {
   };
 
   const handleSaveCustomer = (customerData: Omit<Customer, 'id'> & { id?: string }) => {
+    const sourcePath = isArchiveView ? 'archiv' : 'einträge';
     if (customerData.id) { // Editing existing customer
-      const customerRef = ref(db, `einträge/${customerData.id}`);
+      const customerRef = ref(db, `${sourcePath}/${customerData.id}`);
       const { id, ...dataToSave } = customerData;
       set(customerRef, {
         ...dataToSave,
         notizEditDate: format(new Date(), 'dd.MM.yyyy')
       });
     } else { // Adding new customer
-      const customersRef = ref(db, 'einträge');
+      const customersRef = ref(db, sourcePath);
       const newCustomerRef = push(customersRef);
       const { id, ...dataToSave } = customerData;
       set(newCustomerRef, {
@@ -125,9 +155,28 @@ export default function DashboardPage() {
   };
   
   const handleDeleteCustomer = (customerId: string) => {
-    const customerRef = ref(db, `einträge/${customerId}`);
+    const sourcePath = isArchiveView ? 'archiv' : 'einträge';
+    const customerRef = ref(db, `${sourcePath}/${customerId}`);
     remove(customerRef);
     setIsFormOpen(false);
+  }
+
+  const moveCustomer = (customer: Customer, from: 'einträge' | 'archiv', to: 'einträge' | 'archiv') => {
+    if (!customer.id) return;
+    const fromRef = ref(db, `${from}/${customer.id}`);
+    const toRef = ref(db, `${to}/${customer.id}`);
+    const { id, ...dataToMove } = customer;
+    set(toRef, dataToMove);
+    remove(fromRef);
+    setIsFormOpen(false);
+  }
+
+  const handleArchiveCustomer = (customer: Customer) => {
+    moveCustomer(customer, 'einträge', 'archiv');
+  }
+  
+  const handleUnarchiveCustomer = (customer: Customer) => {
+    moveCustomer(customer, 'archiv', 'einträge');
   }
 
   return (
@@ -141,6 +190,8 @@ export default function DashboardPage() {
         onDeviceChange={setDeviceFilter}
         devices={allDevices}
         onAddNew={handleAddNew}
+        isArchiveView={isArchiveView}
+        onToggleArchiveView={() => setIsArchiveView(!isArchiveView)}
       />
       {isLoading ? (
          <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm mt-4">
@@ -152,10 +203,10 @@ export default function DashboardPage() {
             </div>
          </div>
       ) : (
-        <CustomerList customers={paginatedCustomers} onEdit={handleEdit} />
+        <CustomerList customers={paginatedCustomers} onEdit={handleEdit} isArchiveView={isArchiveView} />
       )}
        <footer className="text-center text-sm text-muted-foreground mt-4">
-        {paginatedCustomers.length} von {filteredCustomers.length} Einträgen angezeigt. Insgesamt: {customers.length}
+        {paginatedCustomers.length} von {filteredCustomers.length} Einträgen angezeigt. Insgesamt: {sourceCustomers.length}
       </footer>
       <CustomerFormDialog
         isOpen={isFormOpen}
@@ -163,6 +214,9 @@ export default function DashboardPage() {
         customer={editingCustomer}
         onSave={handleSaveCustomer}
         onDelete={handleDeleteCustomer}
+        onArchive={handleArchiveCustomer}
+        onUnarchive={handleUnarchiveCustomer}
+        isArchiveView={isArchiveView}
       />
     </>
   );

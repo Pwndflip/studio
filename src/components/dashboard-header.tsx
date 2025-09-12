@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { STATUSES } from "@/app/dashboard/data";
 import type { Status } from "@/app/dashboard/data";
-import { PlusCircle, Search } from "lucide-react";
+import { PlusCircle, Search, Archive, ArrowLeft } from "lucide-react";
 
 type DashboardHeaderProps = {
   searchQuery: string;
@@ -16,6 +16,8 @@ type DashboardHeaderProps = {
   onDeviceChange: (value: string) => void;
   devices: string[];
   onAddNew: () => void;
+  isArchiveView: boolean;
+  onToggleArchiveView: () => void;
 };
 
 export function DashboardHeader({
@@ -27,6 +29,8 @@ export function DashboardHeader({
   onDeviceChange,
   devices,
   onAddNew,
+  isArchiveView,
+  onToggleArchiveView,
 }: DashboardHeaderProps) {
   return (
     <div className="flex items-center justify-between gap-4">
@@ -67,11 +71,17 @@ export function DashboardHeader({
             ))}
           </SelectContent>
         </Select>
+        <Button variant="outline" onClick={onToggleArchiveView}>
+          {isArchiveView ? <ArrowLeft className="mr-2 h-4 w-4"/> : <Archive className="mr-2 h-4 w-4" />}
+          {isArchiveView ? "Zurück" : "Archiv"}
+        </Button>
       </div>
-      <Button onClick={onAddNew} className="ml-auto">
-        <PlusCircle className="mr-2 h-4 w-4" />
-        Kunde hinzufügen
-      </Button>
+      {!isArchiveView && (
+        <Button onClick={onAddNew} className="ml-auto">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Kunde hinzufügen
+        </Button>
+      )}
     </div>
   );
 }
