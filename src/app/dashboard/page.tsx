@@ -6,9 +6,10 @@ import { CustomerList } from '@/components/customer-list';
 import { DashboardHeader } from '@/components/dashboard-header';
 import { CustomerFormDialog } from '@/components/customer-form-dialog';
 import { initialCustomers } from './data';
+import { db } from '@/lib/firebase';
+import { ref, onValue, set, push, remove } from 'firebase/database';
+import { format } from 'date-fns';
 
-// Helper to generate a unique enough ID for local state
-let nextId = initialCustomers.length + 1;
 const ITEMS_PER_PAGE = 25;
 
 export default function DashboardPage() {
@@ -23,19 +24,40 @@ export default function DashboardPage() {
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
   useEffect(() => {
-    // Initialize customers from the local data file
-    const loadedCustomers = initialCustomers.map((c, i) => ({ ...c, id: `initial-${i}` }));
-    
-    const sortedCustomers = loadedCustomers.sort((a, b) => {
-        const dateA = a.datum ? new Date(a.datum).getTime() : 0;
-        const dateB = b.datum ? new Date(b.datum).getTime() : 0;
-        return dateB - dateA;
+    const customersRef = ref(db, 'einträge');
+    const unsubscribe = onValue(customersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const loadedCustomers: Customer[] = Object.entries(data).map(([id, value]) => ({
+          id,
+          ...(value as Omit<Customer, 'id'>),
+        }));
+        
+        const sortedCustomers = loadedCustomers.sort((a, b) => {
+            const dateA = a.datum ? new Date(a.datum).getTime() : 0;
+            const dateB = b.datum ? new Date(b.datum).getTime() : 0;
+            return dateB - dateA;
+        });
+
+        setCustomers(sortedCustomers);
+        const uniqueDevices = [...new Set(sortedCustomers.map(c => c.gerät).filter(Boolean).sort())];
+        setAllDevices(uniqueDevices);
+      } else {
+        setCustomers([]);
+      }
+      setIsLoading(false);
+    }, (error) => {
+        console.error("Firebase read failed: ", error);
+        // Fallback to local data if there's an error (e.g. config not set)
+        console.log("Falling back to local data.");
+        const localCustomers = initialCustomers.map((c, i) => ({ ...c, id: `initial-${i}` }));
+        setCustomers(localCustomers);
+        const uniqueDevices = [...new Set(localCustomers.map(c => c.gerät).filter(Boolean).sort())];
+        setAllDevices(uniqueDevices);
+        setIsLoading(false);
     });
 
-    setCustomers(sortedCustomers);
-    const uniqueDevices = [...new Set(sortedCustomers.map(c => c.gerät).filter(Boolean).sort())];
-    setAllDevices(uniqueDevices);
-    setIsLoading(false);
+    return () => unsubscribe();
   }, []);
 
   const filteredCustomers = useMemo(() => {
@@ -88,22 +110,28 @@ export default function DashboardPage() {
 
   const handleSaveCustomer = (customerData: Omit<Customer, 'id'> & { id?: string }) => {
     if (customerData.id) { // Editing existing customer
-      setCustomers(customers.map(c => 
-        c.id === customerData.id ? { ...c, ...customerData, notizEditDate: new Date().toLocaleDateString('de-DE') } : c
-      ));
+      const customerRef = ref(db, `einträge/${customerData.id}`);
+      const { id, ...dataToSave } = customerData;
+      set(customerRef, {
+        ...dataToSave,
+        notizEditDate: format(new Date(), 'dd.MM.yyyy')
+      });
     } else { // Adding new customer
-      const newCustomer: Customer = {
-        ...customerData,
-        id: `new-${nextId++}`,
-        datum: new Date().toISOString().split('T')[0], // Set current date for new entries
-      };
-      setCustomers([newCustomer, ...customers]);
+      const customersRef = ref(db, 'einträge');
+      const newCustomerRef = push(customersRef);
+      const { id, ...dataToSave } = customerData;
+      set(newCustomerRef, {
+        ...dataToSave,
+        datum: format(new Date(), 'yyyy-MM-dd'),
+        notizEditDate: format(new Date(), 'dd.MM.yyyy')
+      });
     }
     setIsFormOpen(false);
   };
   
   const handleDeleteCustomer = (customerId: string) => {
-    setCustomers(customers.filter(c => c.id !== customerId));
+    const customerRef = ref(db, `einträge/${customerId}`);
+    remove(customerRef);
     setIsFormOpen(false);
   }
 
@@ -122,17 +150,17 @@ export default function DashboardPage() {
       {isLoading ? (
          <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm mt-4">
             <div className="flex flex-col items-center gap-1 text-center p-8">
-                <h3 className="text-2xl font-bold tracking-tight">Lade Kundendaten...</h3>
+                <h3 className="text-2xl font-bold tracking-tight">Verbinde mit Datenbank...</h3>
                 <p className="text-sm text-muted-foreground">
-                    Einen Moment bitte.
+                    Einen Moment bitte. Wenn dies lange dauert, überprüfen Sie bitte Ihre Firebase-Konfiguration.
                 </p>
             </div>
          </div>
       ) : (
         <CustomerList customers={paginatedCustomers} onEdit={handleEdit} />
       )}
-      <footer className="text-center text-sm text-muted-foreground mt-4">
-        {paginatedCustomers.length} von {filteredCustomers.length} Einträgen angezeigt
+       <footer className="text-center text-sm text-muted-foreground mt-4">
+        {paginatedCustomers.length} von {filteredCustomers.length} Einträgen angezeigt. Insgesamt: {customers.length}
       </footer>
       <CustomerFormDialog
         isOpen={isFormOpen}
