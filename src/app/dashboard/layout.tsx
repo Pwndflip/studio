@@ -84,8 +84,8 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
         <Image
             src="/wg-logo-neu.png"
             alt="WeissgeraeteMarkt Logo"
-            width={400}
-            height={400}
+            width={500}
+            height={500}
             className="opacity-10"
         />
       </div>
