@@ -44,12 +44,12 @@ export default function DashboardPage() {
       } else {
         setCustomers([]);
       }
-      setIsLoading(false);
+      setTimeout(() => setIsLoading(false), 500);
     }, (error) => {
         console.error("Firebase read failed on 'einträge': ", error);
         alert("Could not connect to Firebase. Please check your configuration in src/lib/firebase.ts and ensure the database is accessible.");
         setCustomers([]);
-        setIsLoading(false);
+        setTimeout(() => setIsLoading(false), 500);
     });
 
     return () => unsubscribe();
