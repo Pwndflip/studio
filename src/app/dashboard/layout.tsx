@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { User, Database, LogOut } from "lucide-react";
+import { User, Database, LogOut, Map } from "lucide-react";
 import Link from "next/link";
 import { AuthProvider, useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
@@ -69,6 +69,12 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <Link href="/dashboard/fahrplan">
+              <DropdownMenuItem>
+                <Map className="mr-2 h-4 w-4" />
+                <span>Fahrplan</span>
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Abmelden</span>
@@ -81,8 +87,8 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
         <Image
             src="/wg-logo-neu.png"
             alt="WeissgeraeteMarkt Logo"
-            width={850}
-            height={850}
+            width={1200}
+            height={1200}
             className="opacity-20"
         />
       </div>
