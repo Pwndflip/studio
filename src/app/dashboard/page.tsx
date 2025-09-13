@@ -8,7 +8,7 @@ import { DashboardHeader } from '@/components/dashboard-header';
 import { CustomerFormDialog } from '@/components/customer-form-dialog';
 import { db } from '@/lib/firebase';
 import { ref, onValue, set, push, remove } from 'firebase/database';
-import { format } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 
 const ITEMS_PER_PAGE = 25;
 
@@ -45,12 +45,12 @@ export default function DashboardPage() {
       } else {
         setCustomers([]);
       }
-      setTimeout(() => setIsLoading(false), 1500);
+      setTimeout(() => setIsLoading(false), 2000);
     }, (error) => {
         console.error("Firebase read failed on 'einträge': ", error);
         alert("Could not connect to Firebase. Please check your configuration in src/lib/firebase.ts and ensure the database is accessible.");
         setCustomers([]);
-        setTimeout(() => setIsLoading(false), 1500);
+        setTimeout(() => setIsLoading(false), 2000);
     });
 
     return () => unsubscribe();
@@ -147,21 +147,21 @@ export default function DashboardPage() {
         });
     }
 
-    if (customerData.id) { // Editing existing customer
-      const customerRef = ref(db, `${sourcePath}/${customerData.id}`);
-      const { id, ...dataToSave } = customerData;
-      set(customerRef, {
-        ...dataToSave,
-        editDates: updatedEditDates
-      });
+    const { id, ...dataToSave } = customerData;
+    const finalData = {
+      ...dataToSave,
+      editDates: updatedEditDates
+    };
+
+    if (id) { // Editing existing customer
+      const customerRef = ref(db, `${sourcePath}/${id}`);
+      set(customerRef, finalData);
     } else { // Adding new customer
       const customersRef = ref(db, sourcePath);
       const newCustomerRef = push(customersRef);
-      const { id, ...dataToSave } = customerData;
       set(newCustomerRef, {
-        ...dataToSave,
-        datum: format(new Date(), 'yyyy-MM-dd'),
-        editDates: {}
+        ...finalData,
+        datum: isValid(parseISO(customerData.datum)) ? format(parseISO(customerData.datum), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
       });
     }
     setIsFormOpen(false);
@@ -234,5 +234,3 @@ export default function DashboardPage() {
     </>
   );
 }
-
-    

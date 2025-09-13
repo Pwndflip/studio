@@ -23,35 +23,26 @@ const typColors: Record<string, string> = {
 };
 
 export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit: () => void; }) {
-  const lastEditDate = customer.editDates && Object.values(customer.editDates).length > 0 
+  const lastEditDateStr = customer.editDates && Object.values(customer.editDates).length > 0 
     ? Object.values(customer.editDates).reduce((a, b) => a! > b! ? a : b)
     : null;
 
-  const displayDateStr = lastEditDate || customer.datum;
-  
   const parseDate = (dateString: string | undefined): Date | null => {
     if (!dateString) return null;
-    
-    // Try parsing 'yyyy-MM-dd' or ISO format first
     let date = parseISO(dateString);
     if (isValid(date)) return date;
-    
-    // Try parsing 'dd.MM.yyyy' format
     const parts = dateString.split('.');
     if (parts.length === 3) {
-      // Note: new Date(year, monthIndex, day)
       date = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
       if (isValid(date)) return date;
     }
-    
-    // Fallback for other potential string formats that Date.parse might handle
     date = new Date(dateString);
     if (isValid(date)) return date;
-    
-    return null; // Return null if all parsing fails
+    return null;
   }
 
-  const displayDate = parseDate(displayDateStr);
+  const creationDate = parseDate(customer.datum);
+  const lastEditDate = parseDate(lastEditDateStr);
 
   return (
     <Card className="flex h-full flex-col transition-shadow hover:shadow-xl rounded-2xl bg-card/40 backdrop-blur-sm">
@@ -79,12 +70,20 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
               </CardDescription>
             </div>
           </div>
-          {displayDate && (
-            <div className="text-xs text-muted-foreground flex items-center gap-1 shrink-0 pt-1">
-                <CalendarDays className="w-3 h-3"/>
-                <span>{format(displayDate, 'dd.MM.yyyy')}</span>
-            </div>
-          )}
+          <div className="text-xs text-muted-foreground flex flex-col items-end gap-1 shrink-0 pt-1">
+            {creationDate && (
+                <div className="flex items-center gap-1">
+                    <span>E:</span>
+                    <span>{format(creationDate, 'dd.MM.yy')}</span>
+                </div>
+            )}
+            {lastEditDate && (
+                 <div className="flex items-center gap-1 font-semibold">
+                    <span>B:</span>
+                    <span>{format(lastEditDate, 'dd.MM.yy')}</span>
+                </div>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex-grow space-y-3 text-sm">
@@ -116,5 +115,3 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
     </Card>
   );
 }
-
-    
