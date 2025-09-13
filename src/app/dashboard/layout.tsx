@@ -86,7 +86,7 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
             alt="WeissgeraeteMarkt Logo"
             width={400}
             height={400}
-            className="opacity-50 drop-shadow-[0_0_12px_rgba(250,204,21,0.6)]"
+            className="opacity-10"
         />
       </div>
 
