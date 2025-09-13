@@ -49,7 +49,7 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
   const displayDate = parseDate(displayDateStr);
 
   return (
-    <Card className="flex h-full flex-col transition-shadow hover:shadow-xl rounded-2xl bg-card/80 backdrop-blur-sm">
+    <Card className="flex h-full flex-col transition-shadow hover:shadow-xl rounded-2xl bg-card/60 backdrop-blur-lg">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
