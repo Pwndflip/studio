@@ -10,10 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { User, Database, LogOut, Map } from "lucide-react";
+import { User, Database, LogOut, Map, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { AuthProvider, useAuth } from "@/context/auth-context";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { app } from "@/lib/firebase";
@@ -22,6 +22,7 @@ import Image from "next/image";
 function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const auth = getAuth(app);
 
   useEffect(() => {
@@ -34,6 +35,8 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
     await signOut(auth);
     router.push('/');
   };
+
+  const isFahrplanPage = pathname === '/dashboard/fahrplan';
 
   if (loading || !user) {
     return (
@@ -69,12 +72,21 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <Link href="/dashboard/fahrplan">
-              <DropdownMenuItem>
-                <Map className="mr-2 h-4 w-4" />
-                <span>Fahrplan</span>
-              </DropdownMenuItem>
-            </Link>
+            {isFahrplanPage ? (
+              <Link href="/dashboard">
+                <DropdownMenuItem>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  <span>Zurück zum Dashboard</span>
+                </DropdownMenuItem>
+              </Link>
+            ) : (
+              <Link href="/dashboard/fahrplan">
+                <DropdownMenuItem>
+                  <Map className="mr-2 h-4 w-4" />
+                  <span>Fahrplan</span>
+                </DropdownMenuItem>
+              </Link>
+            )}
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Abmelden</span>
