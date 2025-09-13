@@ -49,12 +49,12 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
   const displayDate = parseDate(displayDateStr);
 
   return (
-    <Card className="flex h-full flex-col transition-shadow hover:shadow-xl rounded-2xl">
+    <Card className="flex h-full flex-col transition-shadow hover:shadow-xl rounded-2xl bg-card/80 backdrop-blur-sm">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
             <Avatar className="w-12 h-12">
-              <AvatarFallback className="text-xl">
+              <AvatarFallback className="text-xl bg-muted/80">
                 {customer.name?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
