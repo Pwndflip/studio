@@ -69,9 +69,6 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem disabled>Einstellungen</DropdownMenuItem>
-            <DropdownMenuItem disabled>Support</DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Abmelden</span>
@@ -84,9 +81,9 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
         <Image
             src="/wg-logo-neu.png"
             alt="WeissgeraeteMarkt Logo"
-            width={500}
-            height={500}
-            className="opacity-15"
+            width={850}
+            height={850}
+            className="opacity-20"
         />
       </div>
 
