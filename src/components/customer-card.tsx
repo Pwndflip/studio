@@ -22,12 +22,16 @@ const typColors: Record<string, string> = {
 };
 
 export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit: () => void; }) {
-  const displayDateStr = customer.notizEditDate || customer.datum;
+  const lastEditDate = customer.editDates && Object.values(customer.editDates).length > 0 
+    ? Object.values(customer.editDates).reduce((a, b) => a! > b! ? a : b)
+    : null;
+
+  const displayDateStr = lastEditDate || customer.datum;
   
   const parseDate = (dateString: string | undefined): Date | null => {
     if (!dateString) return null;
     
-    // Try parsing 'yyyy-MM-dd' ISO format first
+    // Try parsing 'yyyy-MM-dd' or ISO format first
     let date = parseISO(dateString);
     if (isValid(date)) return date;
     

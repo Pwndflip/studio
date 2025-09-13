@@ -44,12 +44,12 @@ export default function DashboardPage() {
       } else {
         setCustomers([]);
       }
-      setTimeout(() => setIsLoading(false), 500);
+      setTimeout(() => setIsLoading(false), 1000);
     }, (error) => {
         console.error("Firebase read failed on 'einträge': ", error);
         alert("Could not connect to Firebase. Please check your configuration in src/lib/firebase.ts and ensure the database is accessible.");
         setCustomers([]);
-        setTimeout(() => setIsLoading(false), 500);
+        setTimeout(() => setIsLoading(false), 1000);
     });
 
     return () => unsubscribe();
@@ -132,14 +132,26 @@ export default function DashboardPage() {
     setIsFormOpen(true);
   };
 
-  const handleSaveCustomer = (customerData: Omit<Customer, 'id'> & { id?: string }) => {
+  const handleSaveCustomer = (customerData: Omit<Customer, 'id' | 'editDates'> & { id?: string }, originalCustomer: Customer | null) => {
     const sourcePath = isArchiveView ? 'archiv' : 'einträge';
+    const now = new Date().toISOString();
+    
+    let updatedEditDates = originalCustomer?.editDates || {};
+
+    if (originalCustomer) {
+        (Object.keys(customerData) as (keyof typeof customerData)[]).forEach(key => {
+            if (key !== 'id' && customerData[key] !== originalCustomer[key as keyof Customer]) {
+                updatedEditDates[key as keyof typeof updatedEditDates] = now;
+            }
+        });
+    }
+
     if (customerData.id) { // Editing existing customer
       const customerRef = ref(db, `${sourcePath}/${customerData.id}`);
       const { id, ...dataToSave } = customerData;
       set(customerRef, {
         ...dataToSave,
-        notizEditDate: format(new Date(), 'dd.MM.yyyy')
+        editDates: updatedEditDates
       });
     } else { // Adding new customer
       const customersRef = ref(db, sourcePath);
@@ -148,7 +160,7 @@ export default function DashboardPage() {
       set(newCustomerRef, {
         ...dataToSave,
         datum: format(new Date(), 'yyyy-MM-dd'),
-        notizEditDate: format(new Date(), 'dd.MM.yyyy')
+        editDates: {}
       });
     }
     setIsFormOpen(false);

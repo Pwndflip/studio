@@ -14,7 +14,7 @@ type CustomerFormDialogProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   customer: Customer | null;
-  onSave: (customer: Omit<Customer, 'id'> & { id?: string }) => void;
+  onSave: (customerData: Omit<Customer, 'id' | 'editDates'> & { id?: string }, originalCustomer: Customer | null) => void;
   onDelete: (customerId: string) => void;
   onArchive: (customer: Customer) => void;
   onUnarchive: (customer: Customer) => void;
@@ -38,6 +38,10 @@ export function CustomerFormDialog({
 
   const key = customer ? customer.id : "new";
 
+  const handleSave = (values: any) => {
+    onSave(values, customer);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl">
@@ -49,7 +53,7 @@ export function CustomerFormDialog({
             <CustomerForm
               key={key}
               customer={customer}
-              onSave={onSave}
+              onSave={handleSave}
               onDelete={onDelete}
               onArchive={onArchive}
               onUnarchive={onUnarchive}

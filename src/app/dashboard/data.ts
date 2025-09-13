@@ -32,7 +32,9 @@ export interface Customer {
   notiz: string;
   status: Status;
   datum: string;
-  notizEditDate?: string;
   fehlercode?: string;
   typ?: string;
+  editDates?: {
+    [key in keyof Omit<Customer, 'id' | 'datum' | 'editDates'>]?: string;
+  }
 }

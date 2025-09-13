@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import type { Customer } from "@/app/dashboard/data";
 import { STATUSES, TYPEN } from "@/app/dashboard/data";
@@ -46,7 +47,6 @@ const formSchema = z.object({
   notiz: z.string().optional().nullable(),
   status: z.string().optional().nullable(),
   datum: z.string(),
-  notizEditDate: z.string().optional().nullable(),
   fehlercode: z.string().optional().nullable(),
   typ: z.string().optional().nullable(),
 });
@@ -60,6 +60,29 @@ type CustomerFormProps = {
   isArchiveView: boolean;
   onDone: () => void;
 };
+
+const EditDateWidget = ({ date }: { date?: string }) => {
+  if (!date) return null;
+
+  const parsedDate = parseISO(date);
+  if (!isValid(parsedDate)) return null;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500/20">
+            <CalendarIcon className="h-2.5 w-2.5 text-blue-600" />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Zuletzt bearbeitet: {format(parsedDate, "dd.MM.yyyy 'um' HH:mm", { locale: de })}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
 
 export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, onUnarchive, isArchiveView }: CustomerFormProps) {
   const { toast } = useToast();
@@ -110,8 +133,6 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
       description: `Die Daten von ${values.name} wurden erfolgreich gespeichert.`,
     });
   }
-  
-  const lastEditedDate = parseDate(customer?.notizEditDate);
 
   const handleArchive = () => {
     if(customer) {
@@ -144,7 +165,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Vollständiger Name</FormLabel>
-                  <FormControl><Input placeholder="John Doe" {...field} spellCheck="true" /></FormControl>
+                  <FormControl><div className="relative"><Input placeholder="John Doe" {...field} spellCheck="true" /><EditDateWidget date={customer?.editDates?.name} /></div></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -155,7 +176,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Telefonnummer</FormLabel>
-                  <FormControl><Input placeholder="+49 176 12345678" {...field} value={field.value ?? ""} /></FormControl>
+                  <FormControl><div className="relative"><Input placeholder="+49 176 12345678" {...field} value={field.value ?? ""} /><EditDateWidget date={customer?.editDates?.telefon} /></div></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -166,7 +187,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Adresse</FormLabel>
-                    <FormControl><Input placeholder="Musterstraße 123, 12345 Musterstadt" {...field} value={field.value ?? ""} spellCheck="true" /></FormControl>
+                    <FormControl><div className="relative"><Input placeholder="Musterstraße 123, 12345 Musterstadt" {...field} value={field.value ?? ""} spellCheck="true" /><EditDateWidget date={customer?.editDates?.adresse} /></div></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -178,7 +199,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Gerät</FormLabel>
-                    <FormControl><Input placeholder="z.B. Siemens Waschmaschine" {...field} spellCheck="true" /></FormControl>
+                    <FormControl><div className="relative"><Input placeholder="z.B. Siemens Waschmaschine" {...field} spellCheck="true" /><EditDateWidget date={customer?.editDates?.gerät} /></div></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -189,14 +210,17 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
-                      <FormControl>
-                        <SelectTrigger><SelectValue placeholder="Status auswählen" /></SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {STATUSES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                     <div className="relative">
+                        <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Status auswählen" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {STATUSES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <EditDateWidget date={customer?.editDates?.status} />
+                     </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -207,14 +231,17 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Typ</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
-                      <FormControl>
-                        <SelectTrigger><SelectValue placeholder="Typ auswählen" /></SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {TYPEN.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <div className="relative">
+                        <Select onValueChange={field.onChange} defaultValue={field.value ?? ""}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Typ auswählen" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TYPEN.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <EditDateWidget date={customer?.editDates?.typ} />
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -270,7 +297,7 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Problembeschreibung</FormLabel>
-                    <FormControl><Textarea placeholder="z.B. schleudert nicht, heizt nicht" {...field} value={field.value ?? ""} rows={5} spellCheck="true" /></FormControl>
+                    <FormControl><div className="relative"><Textarea placeholder="z.B. schleudert nicht, heizt nicht" {...field} value={field.value ?? ""} rows={5} spellCheck="true" /><EditDateWidget date={customer?.editDates?.problem} /></div></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -283,16 +310,11 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
                     <div className="flex items-center justify-between">
                       <FormLabel>Interne Notizen</FormLabel>
                     </div>
-                    <FormControl><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." {...field} value={field.value ?? ""} className="flex-grow" spellCheck="true" /></FormControl>
+                    <FormControl><div className="relative h-full"><Textarea placeholder="Fügen Sie hier interne Notizen hinzu..." {...field} value={field.value ?? ""} className="flex-grow h-full" spellCheck="true" /><EditDateWidget date={customer?.editDates?.notiz} /></div></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              {lastEditedDate && (
-                <div className="text-xs text-muted-foreground pt-1 text-right">
-                    Zuletzt bearbeitet: {format(lastEditedDate, "dd.MM.yyyy")}
-                </div>
-              )}
           </div>
         </div>
 
