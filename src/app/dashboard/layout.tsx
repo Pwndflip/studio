@@ -48,7 +48,7 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
-       <header className="sticky top-4 z-30 mx-4 mt-4 flex h-16 items-center gap-4 rounded-xl border bg-background/20 shadow-xl backdrop-blur-2xl md:px-6">
+       <header className="sticky top-4 z-30 mx-4 mt-4 flex h-16 items-center gap-4 rounded-xl border bg-background/40 shadow-xl backdrop-blur-xl md:px-6">
         <nav className="flex-1">
           <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold md:text-base">
             <Database className="h-6 w-6 text-primary" />
@@ -86,7 +86,7 @@ function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
             alt="WeissgeraeteMarkt Logo"
             width={400}
             height={400}
-            className="opacity-10"
+            className="opacity-25 drop-shadow-[0_0_12px_rgba(250,204,21,0.6)]"
         />
       </div>
 
