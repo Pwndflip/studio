@@ -109,7 +109,7 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
       </CardContent>
       <CardFooter>
         <Button variant="secondary" className="w-full" onClick={onEdit}>
-          <Wrench className="mr-2 h-4 w-4" /> Details/bearbeiten
+          <Wrench className="mr-2 h-4 w-4" /> Details / bearbeiten
         </Button>
       </CardFooter>
     </Card>
