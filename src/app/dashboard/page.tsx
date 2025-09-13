@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
@@ -44,12 +45,12 @@ export default function DashboardPage() {
       } else {
         setCustomers([]);
       }
-      setTimeout(() => setIsLoading(false), 1000);
+      setTimeout(() => setIsLoading(false), 1500);
     }, (error) => {
         console.error("Firebase read failed on 'einträge': ", error);
         alert("Could not connect to Firebase. Please check your configuration in src/lib/firebase.ts and ensure the database is accessible.");
         setCustomers([]);
-        setTimeout(() => setIsLoading(false), 1000);
+        setTimeout(() => setIsLoading(false), 1500);
     });
 
     return () => unsubscribe();
@@ -141,7 +142,7 @@ export default function DashboardPage() {
     if (originalCustomer) {
         (Object.keys(customerData) as (keyof typeof customerData)[]).forEach(key => {
             if (key !== 'id' && customerData[key] !== originalCustomer[key as keyof Customer]) {
-                updatedEditDates[key as keyof typeof updatedEditDates] = now;
+                updatedEditDates[key as keyof Omit<Customer, 'id' | 'datum' | 'editDates'>] = now;
             }
         });
     }
@@ -233,3 +234,5 @@ export default function DashboardPage() {
     </>
   );
 }
+
+    

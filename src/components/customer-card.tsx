@@ -1,3 +1,4 @@
+
 import type { Customer } from "@/app/dashboard/data";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -115,3 +116,5 @@ export function CustomerCard({ customer, onEdit }: { customer: Customer; onEdit:
     </Card>
   );
 }
+
+    

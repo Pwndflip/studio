@@ -1,3 +1,4 @@
+
 export type Status = 
   | "Abgeschlossen"
   | "Ersatzteil Bestellt"
@@ -38,3 +39,5 @@ export interface Customer {
     [key in keyof Omit<Customer, 'id' | 'datum' | 'editDates'>]?: string;
   }
 }
+
+    
