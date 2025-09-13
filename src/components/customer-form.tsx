@@ -367,4 +367,3 @@ export function CustomerForm({ customer, onSave, onDelete, onDone, onArchive, on
   );
 }
 
-    
